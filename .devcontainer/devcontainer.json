@@ -1,0 +1,19 @@
+{
+  "name": "F# (.NET 10)",
+  "image": "mcr.microsoft.com/devcontainers/dotnet:10.0",
+  "customizations": {
+    "vscode": {
+      "extensions": ["Ionide.Ionide-fsharp"],
+      "settings": {
+        "FSharp.fsiExtraParameters": ["--nologo"],
+        "editor.formatOnSave": false,
+        "files.autoSave": "afterDelay"
+      }
+    },
+    "codespaces": {
+      "openFiles": ["README.md"]
+    }
+  },
+  "postCreateCommand": "dotnet --version && dotnet fsi --help > /dev/null && echo 'F# is ready.'",
+  "hostRequirements": { "cpus": 2 }
+}
