@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Week 2 · Drills – Functional Programming</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../weeks/week02/lab.html" rel="next">
+<link href="../../weeks/week02/slides.html" rel="prev">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-11cd2b351f627a0e63fc448ff4a87ab1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-bc7666a66758628ea7247e883a9a1c09.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script defer="" src="../../vendor/katex/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <link rel="stylesheet" href="../../vendor/katex/katex.min.css">
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar docked quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../weeks/week02/notes.html">Week 2 · Functions, Recursion, and Types</a></li><li class="breadcrumb-item"><a href="../../weeks/week02/drills.html">Drills</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../../">Functional Programming</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Course home</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Week 1 · Programs as Expressions</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week01/notes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notes</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week01/slides.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Slides</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week01/drills.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Drills</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week01/lab.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lab</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Week 2 · Functions, Recursion, and Types</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week02/notes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notes</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week02/slides.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Slides</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week02/drills.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Drills</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week02/lab.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lab</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Week 3 · Lists, Tuples, and Patterns</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week03/notes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notes</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week03/slides.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Slides</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week03/drills.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Drills</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week03/lab.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lab</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Week 4 · Records, Unions, and Option</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week04/notes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notes</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week04/slides.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Slides</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week04/drills.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Drills</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week04/lab.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lab</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul class="collapse">
+  <li><a href="#a.-trace-by-hand" id="toc-a.-trace-by-hand" class="nav-link active" data-scroll-target="#a.-trace-by-hand">A. Trace by hand</a></li>
+  <li><a href="#b.-from-equations-to-f" id="toc-b.-from-equations-to-f" class="nav-link" data-scroll-target="#b.-from-equations-to-f">B. From equations to F</a></li>
+  <li><a href="#c.-if-and-match" id="toc-c.-if-and-match" class="nav-link" data-scroll-target="#c.-if-and-match">C. <code>if</code> and <code>match</code></a></li>
+  <li><a href="#d.-find-the-bug" id="toc-d.-find-the-bug" class="nav-link" data-scroll-target="#d.-find-the-bug">D. Find the bug</a></li>
+  <li><a href="#e.-read-the-type" id="toc-e.-read-the-type" class="nav-link" data-scroll-target="#e.-read-the-type">E. Read the type</a></li>
+  <li><a href="#f.-write-a-function-with-this-type" id="toc-f.-write-a-function-with-this-type" class="nav-link" data-scroll-target="#f.-write-a-function-with-this-type">F. Write a function with this type</a></li>
+  <li><a href="#g.-partial-application" id="toc-g.-partial-application" class="nav-link" data-scroll-target="#g.-partial-application">G. Partial application</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../weeks/week02/notes.html">Week 2 · Functions, Recursion, and Types</a></li><li class="breadcrumb-item"><a href="../../weeks/week02/drills.html">Drills</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Week 2 · Drills</h1>
+<p class="subtitle lead">Functions, Recursion, and Reading Types</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Recursion becomes easy only through repetition, so this sheet is long on purpose. Each section has three tiers:</p>
+<ul>
+<li><strong>Core</strong>: everyone does these. We do some of them in class.</li>
+<li><strong>Practice</strong>: more of the same shape. Do these until the recipe feels automatic.</li>
+<li><strong>Stretch</strong>: harder variations, for when the core feels easy.</li>
+</ul>
+<p>Work <strong>on paper first</strong>, then check in FSI. For every function you write, go through the four steps of the recipe: <strong>type</strong>, <strong>base case</strong>, <strong>recursive case</strong>, <strong>check</strong>.</p>
+<p>Unless a question says otherwise, use these definitions from the notes:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> sumTo n =</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> n <span class="kw">with</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    | <span class="dv">0</span> -&gt; <span class="dv">0</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    | n -&gt; n + sumTo <span class="op">(</span>n - <span class="dv">1</span><span class="op">)</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> power x n =</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> n <span class="kw">with</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    | <span class="dv">0</span> -&gt; <span class="fl">1.0</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    | n -&gt; x * power x <span class="op">(</span>n - <span class="dv">1</span><span class="op">)</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> repeat s n =</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> n <span class="kw">with</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    | <span class="dv">0</span> -&gt; <span class="st">""</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    | n -&gt; s + repeat s <span class="op">(</span>n - <span class="dv">1</span><span class="op">)</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> binary n =</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> n <span class="kw">with</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    | <span class="dv">0</span> -&gt; <span class="st">"0"</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    | <span class="dv">1</span> -&gt; <span class="st">"1"</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    | n -&gt; binary <span class="op">(</span>n / <span class="dv">2</span><span class="op">)</span> + <span class="dt">string</span> <span class="op">(</span>n % <span class="dv">2</span><span class="op">)</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> digitSum n =</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> n <span class="kw">with</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    | n <span class="kw">when</span> n &lt; <span class="dv">10</span> -&gt; n</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>    | n -&gt; n % <span class="dv">10</span> + digitSum <span class="op">(</span>n / <span class="dv">10</span><span class="op">)</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> gcd a b =</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> b <span class="kw">with</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>    | <span class="dv">0</span> -&gt; a</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>    | b -&gt; gcd b <span class="op">(</span>a % b<span class="op">)</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> fib n =</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> n <span class="kw">with</span></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>    | <span class="dv">0</span> -&gt; <span class="dv">0</span></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>    | <span class="dv">1</span> -&gt; <span class="dv">1</span></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>    | n -&gt; fib <span class="op">(</span>n - <span class="dv">1</span><span class="op">)</span> + fib <span class="op">(</span>n - <span class="dv">2</span><span class="op">)</span></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> add x y = x + y</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> twice f x = f <span class="op">(</span>f x<span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="a.-trace-by-hand" class="level1">
+<h1>A. Trace by hand</h1>
+<p>Write the evaluation step by step until you reach a value. For <strong>Core</strong>, write a full trace, numbering each step with the rule you used (including rule 7 for <code>match</code>), for at least A1. For the others, the equation style (<code>sumTo 3 = 3 + sumTo 2 = …</code>) is enough.</p>
+<p><strong>Core</strong></p>
+<ol type="1">
+<li><code>sumTo 4</code> (full trace)</li>
+<li><code>power 3.0 2</code></li>
+<li><code>binary 13</code></li>
+<li><code>gcd 84 36</code>. How many calls to <code>gcd</code> happen in total?</li>
+</ol>
+<p><strong>Practice</strong></p>
+<ol start="5" type="1">
+<li><code>repeat "-" 3</code></li>
+<li><code>digitSum 9075</code></li>
+</ol>
+<p><strong>Stretch</strong></p>
+<ol start="7" type="1">
+<li>Draw all the calls made by <code>fib 5</code> as a tree, with <code>fib 5</code> at the top and each call’s children below it. How many calls are there in total? How many times is <code>fib 3</code> computed? Why does this explain the slowness of <code>fib 40</code>?</li>
+</ol>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Answers
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<pre class="trace"><code>1.   sumTo 4
+   ⇝ match 4 with | 0 -&gt; 0 | n -&gt; n + sumTo (n - 1)     (3)
+   ⇝ 4 + sumTo (4 - 1)                                  (7) 4 isn't 0; n ↦ 4
+   ⇝ 4 + sumTo 3                                        (4)
+   ⇝ 4 + (3 + sumTo 2)                                  (3),(7),(4)
+   ⇝ 4 + (3 + (2 + sumTo 1))                            (3),(7),(4)
+   ⇝ 4 + (3 + (2 + (1 + sumTo 0)))                      (3),(7),(4)
+   ⇝ 4 + (3 + (2 + (1 + 0)))                            (3),(7) 0 fits
+   ⇝ 4 + (3 + (2 + 1))  ⇝  4 + (3 + 3)  ⇝  4 + 6  ⇝  10  (4)
+
+2.   power 3.0 2 = 3.0 * power 3.0 1
+                 = 3.0 * (3.0 * power 3.0 0)
+                 = 3.0 * (3.0 * 1.0)
+                 = 9.0
+
+3.   binary 13 = binary 6 + "1"                 13 = 2 × 6 + 1
+               = (binary 3 + "0") + "1"         6 = 2 × 3 + 0
+               = ((binary 1 + "1") + "0") + "1" 3 = 2 × 1 + 1
+               = "1" + "1" + "0" + "1"
+               = "1101"
+
+4.   gcd 84 36 = gcd 36 12       84 % 36 = 12
+               = gcd 12 0        36 % 12 = 0
+               = 12              three calls in total
+
+5.   repeat "-" 3 = "-" + ("-" + ("-" + "")) = "---"
+
+6.   digitSum 9075 = 5 + digitSum 907
+                   = 5 + (7 + digitSum 90)
+                   = 5 + (7 + (0 + digitSum 9))
+                   = 5 + (7 + (0 + 9))
+                   = 21</code></pre>
+<ol start="7" type="1">
+<li>The tree has <strong>15</strong> calls. <code>fib 3</code> is computed <strong>twice</strong>, <code>fib 2</code> three times, <code>fib 1</code> five times. Every call to <code>fib n</code> (for <code>n ≥ 2</code>) makes two more calls, and the two subtrees overlap almost completely, so the number of calls grows about as fast as the Fibonacci numbers themselves: roughly ×1.6 for each step. <code>fib 40</code> makes over 300 million calls.</li>
+</ol>
+</div>
+</div>
+</div>
+</section>
+<section id="b.-from-equations-to-f" class="level1">
+<h1>B. From equations to F</h1>
+<p>Each function is given as equations. Write it in F# with <code>match</code>, and give its type.</p>
+<p><strong>Core</strong></p>
+<ol type="1">
+<li>The sum of the squares <span class="math inline">0^2 + 1^2 + \cdots + n^2</span>: <span class="math display"> \mathit{sq}(0) = 0 \qquad \mathit{sq}(n) = n^2 + \mathit{sq}(n-1) </span> <code>sumOfSquares 3</code> should be <code>14</code>.</li>
+<li>A rocket countdown: <code>countdown 3</code> should be <code>"3 2 1 liftoff"</code>. <span class="math display"> \mathit{cd}(0) = \text{"liftoff"} \qquad \mathit{cd}(n) = n \text{ followed by a space and } \mathit{cd}(n-1) </span></li>
+<li>Multiplication by repeated addition (no <code>*</code> allowed): <span class="math display"> a \cdot 0 = 0 \qquad a \cdot b = a + a \cdot (b - 1) </span></li>
+</ol>
+<p><strong>Practice</strong></p>
+<ol start="4" type="1">
+<li><code>numDigits</code>: the number of decimal digits of a natural number. <code>numDigits 9075 = 4</code>, <code>numDigits 7 = 1</code>. Hint: look at <code>digitSum</code>, and write the equations first.</li>
+<li><em>Tower of Hanoi.</em> Moving a stack of <span class="math inline">n</span> discs takes <span class="math inline">h(n)</span> moves, where <span class="math display"> h(0) = 0 \qquad h(n) = 2\,h(n-1) + 1 </span> Write <code>hanoi</code>, and compute <code>hanoi 10</code>. Can you guess a formula for <code>hanoi n</code>?</li>
+</ol>
+<p><strong>Stretch</strong></p>
+<ol start="6" type="1">
+<li>Generalise <code>binary</code> to any base from 2 to 10: <code>toBase 8 64 = "100"</code>, <code>toBase 10 1234 = "1234"</code>. Which order should the parameters be in, so that <code>let octal = toBase 8</code> works?</li>
+<li>The <strong>Ackermann function</strong> is a famous example of a function that grows extremely fast: <span class="math display">
+A(0, n) = n + 1 \qquad A(m, 0) = A(m - 1, 1) \qquad A(m, n) = A(m - 1,\ A(m, n - 1))
+</span> Write <code>ack m n</code>. You will need a <code>match</code> inside a <code>match</code>. Check that <code>ack 2 3 = 9</code> and <code>ack 3 3 = 61</code>. Don’t try <code>ack 4 2</code>: the answer has 19,729 digits.</li>
+</ol>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Answers
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> sumOfSquares n =</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> n <span class="kw">with</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    | <span class="dv">0</span> -&gt; <span class="dv">0</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    | n -&gt; n * n + sumOfSquares <span class="op">(</span>n - <span class="dv">1</span><span class="op">)</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> countdown n =</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> n <span class="kw">with</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    | <span class="dv">0</span> -&gt; <span class="st">"liftoff"</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    | n -&gt; <span class="dt">string</span> n + <span class="st">" "</span> + countdown <span class="op">(</span>n - <span class="dv">1</span><span class="op">)</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> mul a b =</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> b <span class="kw">with</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    | <span class="dv">0</span> -&gt; <span class="dv">0</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    | b -&gt; a + mul a <span class="op">(</span>b - <span class="dv">1</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Types: <code>sumOfSquares: int -&gt; int</code>, <code>countdown: int -&gt; string</code>, <code>mul: int -&gt; int -&gt; int</code>.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> numDigits n =</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> n <span class="kw">with</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    | n <span class="kw">when</span> n &lt; <span class="dv">10</span> -&gt; <span class="dv">1</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    | n -&gt; <span class="dv">1</span> + numDigits <span class="op">(</span>n / <span class="dv">10</span><span class="op">)</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> hanoi n =</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> n <span class="kw">with</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    | <span class="dv">0</span> -&gt; <span class="dv">0</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    | n -&gt; <span class="dv">2</span> * hanoi <span class="op">(</span>n - <span class="dv">1</span><span class="op">)</span> + <span class="dv">1</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>hanoi 10 = 1023</code>. The formula is <span class="math inline">h(n) = 2^n - 1</span> (you can prove it by induction, as in the notes).</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> digitChar d = <span class="dt">string</span> d        //<span class="co"> digits 0-9 only, enough for bases up to 10</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> toBase b n =</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> n <span class="kw">with</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    | n <span class="kw">when</span> n &lt; b -&gt; digitChar n</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    | n -&gt; toBase b <span class="op">(</span>n / b<span class="op">)</span> + digitChar <span class="op">(</span>n % b<span class="op">)</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> octal = toBase <span class="dv">8</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> ack m n =</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> m <span class="kw">with</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    | <span class="dv">0</span> -&gt; n + <span class="dv">1</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    | m -&gt;</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>        <span class="kw">match</span> n <span class="kw">with</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>        | <span class="dv">0</span> -&gt; ack <span class="op">(</span>m - <span class="dv">1</span><span class="op">)</span> <span class="dv">1</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>        | n -&gt; ack <span class="op">(</span>m - <span class="dv">1</span><span class="op">)</span> <span class="op">(</span>ack m <span class="op">(</span>n - <span class="dv">1</span><span class="op">))</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The base must come <strong>first</strong>, so that partial application fixes it: <code>toBase 8</code> is a function waiting for the number. Notice how <code>toBase</code> is <code>binary</code> with <code>2</code> replaced by <code>b</code>, and how the base case is a <em>range</em> (<code>n &lt; b</code>) instead of two constants.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="c.-if-and-match" class="level1">
+<h1>C. <code>if</code> and <code>match</code></h1>
+<p><strong>Core</strong></p>
+<ol type="1">
+<li><p>Rewrite with <code>match</code> and a guard:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> absolute n = <span class="kw">if</span> n &lt; <span class="dv">0</span> <span class="kw">then</span> -n <span class="kw">else</span> n</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div></li>
+<li><p>Rewrite Week 1’s <code>shippingFee</code> using <code>match</code> with guards instead of <code>if</code>/<code>elif</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> shippingFee weight =</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">if</span> weight &lt;= <span class="dv">1</span> <span class="kw">then</span> <span class="dv">40</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">elif</span> weight &lt;= <span class="dv">5</span> <span class="kw">then</span> <span class="dv">40</span> + <span class="op">(</span>weight - <span class="dv">1</span><span class="op">)</span> * <span class="dv">15</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">else</span> <span class="dv">100</span> + <span class="op">(</span>weight - <span class="dv">5</span><span class="op">)</span> * <span class="dv">10</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div></li>
+</ol>
+<p><strong>Practice</strong></p>
+<ol start="3" type="1">
+<li>Now the other direction. Rewrite <code>isWeekend</code> from the notes <em>without</em> <code>match</code> and <em>without</em> <code>if</code>, as a single boolean expression.</li>
+</ol>
+<p><strong>Stretch</strong></p>
+<ol start="4" type="1">
+<li>For each of the three functions above, which version do you find clearer, and why? Is there a general rule?</li>
+</ol>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Answers
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-3" class="callout-3-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> absolute n =</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> n <span class="kw">with</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    | n <span class="kw">when</span> n &lt; <span class="dv">0</span> -&gt; -n</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    | n -&gt; n</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> shippingFee weight =</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> weight <span class="kw">with</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    | w <span class="kw">when</span> w &lt;= <span class="dv">1</span> -&gt; <span class="dv">40</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    | w <span class="kw">when</span> w &lt;= <span class="dv">5</span> -&gt; <span class="dv">40</span> + <span class="op">(</span>w - <span class="dv">1</span><span class="op">)</span> * <span class="dv">15</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    | w -&gt; <span class="dv">100</span> + <span class="op">(</span>w - <span class="dv">5</span><span class="op">)</span> * <span class="dv">10</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> isWeekendIf day = day = <span class="st">"Saturday"</span> || day = <span class="st">"Sunday"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ol start="4" type="1">
+<li>There is no single right answer. A reasonable rule: when the cases are <strong>ranges</strong> of one value (as in <code>shippingFee</code>), <code>match</code> with guards and <code>if</code>/<code>elif</code> are about equally clear. When the cases are <strong>specific values</strong>, <code>match</code> is clearer. When the answer is itself a yes/no, a boolean expression is often simplest. From Week 4 on, <code>match</code> wins almost every time, because it can take apart structured values.</li>
+</ol>
+</div>
+</div>
+</div>
+</section>
+<section id="d.-find-the-bug" class="level1">
+<h1>D. Find the bug</h1>
+<p>Each function is wrong. Say what happens when you use it (error, warning, wrong answer, or crash), and fix it.</p>
+<p><strong>Core</strong></p>
+<ol type="1">
+<li><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> sumTo n =</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> n <span class="kw">with</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    | <span class="dv">0</span> -&gt; <span class="dv">0</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    | n -&gt; n + sumTo n</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div></li>
+<li><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> fact n =</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> n <span class="kw">with</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    | <span class="dv">0</span> -&gt; <span class="dv">1</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    | n -&gt; n * fact <span class="op">(</span>n - <span class="dv">1</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div></li>
+<li><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> fact n =</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> n <span class="kw">with</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    | n -&gt; n * fact <span class="op">(</span>n - <span class="dv">1</span><span class="op">)</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    | <span class="dv">0</span> -&gt; <span class="dv">1</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div></li>
+<li><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> repeat s n =</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> n <span class="kw">with</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    | <span class="dv">0</span> -&gt; s</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    | n -&gt; s + repeat s <span class="op">(</span>n - <span class="dv">1</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div></li>
+</ol>
+<p><strong>Practice</strong></p>
+<ol start="5" type="1">
+<li><p>What does <code>binary 6</code> give with this version? Why?</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> binary n =</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> n <span class="kw">with</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    | <span class="dv">0</span> -&gt; <span class="st">"0"</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    | n -&gt; binary <span class="op">(</span>n / <span class="dv">2</span><span class="op">)</span> + <span class="dt">string</span> <span class="op">(</span>n % <span class="dv">2</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div></li>
+<li><p>This works for some inputs and crashes on others. Which ones?</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> countdown n =</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> n <span class="kw">with</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    | <span class="dv">0</span> -&gt; <span class="st">"liftoff"</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    | n -&gt; <span class="dt">string</span> n + <span class="st">" "</span> + countdown <span class="op">(</span>n - <span class="dv">2</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div></li>
+</ol>
+<p><strong>Stretch</strong></p>
+<ol start="7" type="1">
+<li><code>fact 13</code> returns <code>1932053504</code>. Is that correct? What happened, and how do you fix it?</li>
+</ol>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Answers
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-4" class="callout-4-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li>The recursive call <code>sumTo n</code> doesn’t make the input smaller, so it never reaches <code>0</code>: <strong>stack overflow</strong> for any input except <code>0</code>. Fix: <code>sumTo (n - 1)</code>.</li>
+<li>Missing <code>rec</code>: <strong>error FS0039</strong>, <code>The value or constructor 'fact' is not defined</code>.</li>
+<li>The first rule catches everything, so the base case is never used: <strong>warning FS0026</strong>, <code>This rule will never be matched</code>, and then a <strong>stack overflow</strong> at run time. Fix: put <code>| 0 -&gt; 1</code> first.</li>
+<li>Wrong base case: repeating <code>s</code> zero times should give <code>""</code>, not <code>s</code>. Now <code>repeat "ab" 2</code> gives <code>"ababab"</code>, one copy too many. An <strong>off-by-one</strong> error with no warning at all. The check step (trace a small input!) catches it.</li>
+<li><code>"0110"</code>, with a leading zero. <code>binary 1 = binary 0 + "1" = "01"</code>, and that extra <code>"0"</code> appears at the front of every result. The fix is the second base case <code>| 1 -&gt; "1"</code>.</li>
+<li>It subtracts 2, so it only reaches <code>0</code> from <strong>even</strong> numbers. <code>countdown 4 = "4 2 liftoff"</code> works, but <code>countdown 3</code> goes <code>3, 1, -1, -3, …</code>: <strong>stack overflow</strong>. The measure (the notes’ “going further” box) doesn’t reach the base case.</li>
+<li>Not correct: <span class="math inline">13! = 6{,}227{,}020{,}800</span>, which is bigger than the largest <code>int</code> (about 2.1 billion). <code>int</code> arithmetic <strong>wraps around silently</strong>. Fix: use <code>int64</code> (<code>factBig 13L</code> in the notes) or <code>bigint</code>.</li>
+</ol>
+</div>
+</div>
+</div>
+</section>
+<section id="e.-read-the-type" class="level1">
+<h1>E. Read the type</h1>
+<p>Write the type FSI will report. Then check in FSI.</p>
+<p><strong>Core</strong></p>
+<ol type="1">
+<li><code>let rec f n = match n with 0 -&gt; "" | n -&gt; "*" + f (n - 1)</code></li>
+<li><code>let g x y = x * y + 0.5</code></li>
+<li><code>let h a b = if a then b else b + 1</code></li>
+<li><code>let k x = x</code></li>
+<li><code>let pairUp x y = y</code></li>
+<li><code>let apply f x = f x</code></li>
+</ol>
+<p><strong>Practice</strong></p>
+<ol start="7" type="1">
+<li><code>let compose f g x = g (f x)</code></li>
+<li><code>let m s n = String.replicate n s</code>, given that <code>String.replicate</code> has type <code>int -&gt; string -&gt; string</code></li>
+</ol>
+<p><strong>Stretch</strong></p>
+<ol start="9" type="1">
+<li><code>let rec loop n = loop (n + 1)</code>. The result type is surprising. Why?</li>
+<li><code>let weird x = failwith "no"</code></li>
+</ol>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Answers
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-5" class="callout-5-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li><code>f: n: int -&gt; string</code></li>
+<li><code>g: x: float -&gt; y: float -&gt; float</code>. <code>+ 0.5</code> makes <code>x * y</code> a <code>float</code>, so both <code>x</code> and <code>y</code> are <code>float</code>s.</li>
+<li><code>h: a: bool -&gt; b: int -&gt; int</code>. <code>a</code> is an <code>if</code> condition.</li>
+<li><code>k: x: 'a -&gt; 'a</code></li>
+<li><code>pairUp: x: 'a -&gt; y: 'b -&gt; 'b</code></li>
+<li><code>apply: f: ('a -&gt; 'b) -&gt; x: 'a -&gt; 'b</code>. <code>f</code> is applied to <code>x</code>, so <code>f</code> is a function whose argument type is <code>x</code>’s type; nothing else is known, so both types stay generic.</li>
+<li><code>compose: f: ('a -&gt; 'b) -&gt; g: ('b -&gt; 'c) -&gt; x: 'a -&gt; 'c</code>. <code>f</code>’s result is passed to <code>g</code>, so they must agree (<code>'b</code>).</li>
+<li><code>m: s: string -&gt; n: int -&gt; string</code></li>
+<li><code>loop: n: int -&gt; 'a</code>. The function never returns, so nothing in the body says what it returns. The result type has no clues, so it stays generic. (A function that “returns any type you like” is a hint that it never returns normally.)</li>
+<li><code>weird: x: 'a -&gt; 'b</code>. <code>failwith</code> stops the program instead of returning, so, like <code>loop</code>, it can pretend to return any type. That’s why <code>failwith "TODO"</code> fits in any function body in the labs.</li>
+</ol>
+</div>
+</div>
+</div>
+</section>
+<section id="f.-write-a-function-with-this-type" class="level1">
+<h1>F. Write a function with this type</h1>
+<p>Write any function that FSI reports with exactly this type (parameter names don’t matter). There are many correct answers.</p>
+<p><strong>Practice</strong></p>
+<ol type="1">
+<li><code>int -&gt; bool</code></li>
+<li><code>string -&gt; int -&gt; string</code></li>
+<li><code>int -&gt; int -&gt; bool</code></li>
+</ol>
+<p><strong>Stretch</strong></p>
+<ol start="4" type="1">
+<li><code>'a -&gt; int</code></li>
+<li><code>(int -&gt; 'a) -&gt; 'a</code></li>
+<li><code>'a -&gt; 'a -&gt; 'a</code></li>
+</ol>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Sample answers
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-6" class="callout-6-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> isPositive n = n &gt; <span class="dv">0</span>                      //<span class="co"> int -&gt; bool</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> indent <span class="op">(</span>s: <span class="dt">string</span><span class="op">)</span> n = String<span class="kw">.</span>replicate n <span class="st">" "</span> + s   //<span class="co"> string -&gt; int -&gt; string</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> divides d n = n % d = <span class="dv">0</span>                   //<span class="co"> int -&gt; int -&gt; bool</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> alwaysOne _ = <span class="dv">1</span>                           //<span class="co"> 'a -&gt; int</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> atZero f = f <span class="dv">0</span>                            //<span class="co"> (int -&gt; 'a) -&gt; 'a</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> either x y = <span class="kw">if</span> <span class="kw">true</span> <span class="kw">then</span> x <span class="kw">else</span> y        //<span class="co"> 'a -&gt; 'a -&gt; 'a</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>A trap in question 2: <code>let label (s: string) n = s + string n</code> has type <code>string -&gt; 'a -&gt; string</code>, not <code>string -&gt; int -&gt; string</code>. The function <code>string</code> accepts a value of <em>any</em> type, so it gives no clue about <code>n</code>. To make <code>n</code> an <code>int</code>, use it where only an <code>int</code> fits, as <code>String.replicate</code> does, or annotate it: <code>(n: int)</code>.</p>
+<p>Question 6 is the hardest: both parameters must have the <em>same</em> type, and the result too. Returning one of them from an <code>if</code> forces that, because both branches must have the same type.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="g.-partial-application" class="level1">
+<h1>G. Partial application</h1>
+<p><strong>Core</strong></p>
+<ol type="1">
+<li><code>let laugh = repeat "ha"</code>. What is the type of <code>laugh</code>? What is <code>laugh 3</code>?</li>
+<li>What is the type of <code>power 10.0</code>? What is <code>(power 10.0) 3</code>?</li>
+<li>What does FSI report for <code>let f = add</code>?</li>
+</ol>
+<p><strong>Practice</strong></p>
+<ol start="4" type="1">
+<li>Using <code>power</code> and partial application, you can easily make “powers of 3”. Can you make “the cube of a number” the same way? Why not, and what would you change?</li>
+</ol>
+<p><strong>Stretch</strong></p>
+<ol start="5" type="1">
+<li>What is <code>twice twice (add 1) 0</code>? Work it out by substitution before trying it.</li>
+</ol>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-7-contents" aria-controls="callout-7" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Answers
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-7" class="callout-7-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li><p><code>laugh: (int -&gt; string)</code>, and <code>laugh 3 = "hahaha"</code>.</p></li>
+<li><p><code>power 10.0: (int -&gt; float)</code>, and <code>(power 10.0) 3 = 1000.0</code>.</p></li>
+<li><p><code>val f: (int -&gt; int -&gt; int)</code>. <code>f</code> is just another name for the same function.</p></li>
+<li><p>No: partial application fixes the <strong>first</strong> parameters, and <code>power</code>’s first parameter is the base. To fix the exponent, it would have to come first: with <code>let rec power' n x = …</code>, the cube would be <code>power' 3</code>. (You can also write <code>fun x -&gt; power x 3</code>, which is Week 5’s topic.)</p></li>
+<li><p><code>4</code>. <code>twice twice (add 1)</code> means <code>twice (twice (add 1))</code>: “do (add 1) twice”, done twice, which is add 1 four times.</p>
+<pre class="trace"><code>twice twice (add 1) 0 = twice (twice (add 1)) 0
+                      = (twice (add 1)) ((twice (add 1)) 0)
+                      = (twice (add 1)) 2
+                      = 4</code></pre></li>
+</ol>
+</div>
+</div>
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../../weeks/week02/slides.html" class="pagination-link" aria-label="Slides">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Slides</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../../weeks/week02/lab.html" class="pagination-link" aria-label="Lab">
+        <span class="nav-page-text">Lab</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

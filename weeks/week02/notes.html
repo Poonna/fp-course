@@ -1,0 +1,1489 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Week 2 · Functions, Recursion, and Reading Types – Functional Programming</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../weeks/week02/slides.html" rel="next">
+<link href="../../weeks/week01/lab.html" rel="prev">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-11cd2b351f627a0e63fc448ff4a87ab1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-bc7666a66758628ea7247e883a9a1c09.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script defer="" src="../../vendor/katex/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <link rel="stylesheet" href="../../vendor/katex/katex.min.css">
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar docked quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../weeks/week02/notes.html">Week 2 · Functions, Recursion, and Types</a></li><li class="breadcrumb-item"><a href="../../weeks/week02/notes.html">Notes</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../../">Functional Programming</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Course home</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Week 1 · Programs as Expressions</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week01/notes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notes</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week01/slides.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Slides</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week01/drills.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Drills</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week01/lab.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lab</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Week 2 · Functions, Recursion, and Types</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week02/notes.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Notes</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week02/slides.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Slides</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week02/drills.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Drills</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week02/lab.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lab</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Week 3 · Lists, Tuples, and Patterns</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week03/notes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notes</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week03/slides.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Slides</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week03/drills.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Drills</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week03/lab.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lab</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Week 4 · Records, Unions, and Option</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week04/notes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notes</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week04/slides.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Slides</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week04/drills.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Drills</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week04/lab.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lab</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul class="collapse">
+  <li><a href="#functions-that-call-themselves" id="toc-functions-that-call-themselves" class="nav-link active" data-scroll-target="#functions-that-call-themselves"><span class="header-section-number">1</span> Functions that call themselves</a>
+  <ul class="collapse">
+  <li><a href="#a-definition-in-terms-of-itself" id="toc-a-definition-in-terms-of-itself" class="nav-link" data-scroll-target="#a-definition-in-terms-of-itself"><span class="header-section-number">1.1</span> A definition in terms of itself</a></li>
+  <li><a href="#tracing-a-recursive-function" id="toc-tracing-a-recursive-function" class="nav-link" data-scroll-target="#tracing-a-recursive-function"><span class="header-section-number">1.2</span> Tracing a recursive function</a></li>
+  <li><a href="#the-shortcut-tracing-with-equations" id="toc-the-shortcut-tracing-with-equations" class="nav-link" data-scroll-target="#the-shortcut-tracing-with-equations"><span class="header-section-number">1.3</span> The shortcut: tracing with equations</a></li>
+  </ul></li>
+  <li><a href="#a-recipe-for-recursive-functions" id="toc-a-recipe-for-recursive-functions" class="nav-link" data-scroll-target="#a-recipe-for-recursive-functions"><span class="header-section-number">2</span> A recipe for recursive functions</a>
+  <ul class="collapse">
+  <li><a href="#the-recipe-in-action-sumto" id="toc-the-recipe-in-action-sumto" class="nav-link" data-scroll-target="#the-recipe-in-action-sumto"><span class="header-section-number">2.1</span> The recipe in action: <code>sumTo</code></a></li>
+  </ul></li>
+  <li><a href="#another-way-to-write-it-match" id="toc-another-way-to-write-it-match" class="nav-link" data-scroll-target="#another-way-to-write-it-match"><span class="header-section-number">3</span> Another way to write it: <code>match</code></a>
+  <ul class="collapse">
+  <li><a href="#how-a-match-is-evaluated" id="toc-how-a-match-is-evaluated" class="nav-link" data-scroll-target="#how-a-match-is-evaluated"><span class="header-section-number">3.1</span> How a <code>match</code> is evaluated</a></li>
+  <li><a href="#kinds-of-patterns" id="toc-kinds-of-patterns" class="nav-link" data-scroll-target="#kinds-of-patterns"><span class="header-section-number">3.2</span> Kinds of patterns</a></li>
+  <li><a href="#guards-conditions-on-a-rule" id="toc-guards-conditions-on-a-rule" class="nav-link" data-scroll-target="#guards-conditions-on-a-rule"><span class="header-section-number">3.3</span> Guards: conditions on a rule</a></li>
+  <li><a href="#the-compiler-checks-your-cases" id="toc-the-compiler-checks-your-cases" class="nav-link" data-scroll-target="#the-compiler-checks-your-cases"><span class="header-section-number">3.4</span> The compiler checks your cases</a></li>
+  <li><a href="#if-or-match" id="toc-if-or-match" class="nav-link" data-scroll-target="#if-or-match"><span class="header-section-number">3.5</span> <code>if</code> or <code>match</code>?</a></li>
+  </ul></li>
+  <li><a href="#the-recursion-ladder" id="toc-the-recursion-ladder" class="nav-link" data-scroll-target="#the-recursion-ladder"><span class="header-section-number">4</span> The recursion ladder</a>
+  <ul class="collapse">
+  <li><a href="#two-parameters-power" id="toc-two-parameters-power" class="nav-link" data-scroll-target="#two-parameters-power"><span class="header-section-number">4.1</span> Two parameters: <code>power</code></a></li>
+  <li><a href="#building-text-repeat" id="toc-building-text-repeat" class="nav-link" data-scroll-target="#building-text-repeat"><span class="header-section-number">4.2</span> Building text: <code>repeat</code></a></li>
+  <li><a href="#two-base-cases-binary" id="toc-two-base-cases-binary" class="nav-link" data-scroll-target="#two-base-cases-binary"><span class="header-section-number">4.3</span> Two base cases: <code>binary</code></a></li>
+  <li><a href="#smaller-isnt-always-n---1-digitsum" id="toc-smaller-isnt-always-n---1-digitsum" class="nav-link" data-scroll-target="#smaller-isnt-always-n---1-digitsum"><span class="header-section-number">4.4</span> “Smaller” isn’t always <code>n - 1</code>: <code>digitSum</code></a></li>
+  <li><a href="#no-waiting-work-gcd" id="toc-no-waiting-work-gcd" class="nav-link" data-scroll-target="#no-waiting-work-gcd"><span class="header-section-number">4.5</span> No waiting work: <code>gcd</code></a></li>
+  <li><a href="#two-recursive-calls-fib" id="toc-two-recursive-calls-fib" class="nav-link" data-scroll-target="#two-recursive-calls-fib"><span class="header-section-number">4.6</span> Two recursive calls: <code>fib</code></a></li>
+  </ul></li>
+  <li><a href="#when-recursion-goes-wrong" id="toc-when-recursion-goes-wrong" class="nav-link" data-scroll-target="#when-recursion-goes-wrong"><span class="header-section-number">5</span> When recursion goes wrong</a>
+  <ul class="collapse">
+  <li><a href="#no-way-to-reach-the-base-case" id="toc-no-way-to-reach-the-base-case" class="nav-link" data-scroll-target="#no-way-to-reach-the-base-case"><span class="header-section-number">5.1</span> No way to reach the base case</a></li>
+  <li><a href="#numbers-that-are-too-big" id="toc-numbers-that-are-too-big" class="nav-link" data-scroll-target="#numbers-that-are-too-big"><span class="header-section-number">5.2</span> Numbers that are too big</a></li>
+  </ul></li>
+  <li><a href="#reading-types" id="toc-reading-types" class="nav-link" data-scroll-target="#reading-types"><span class="header-section-number">6</span> Reading types</a>
+  <ul class="collapse">
+  <li><a href="#many-arrows-currying" id="toc-many-arrows-currying" class="nav-link" data-scroll-target="#many-arrows-currying"><span class="header-section-number">6.1</span> Many arrows: currying</a></li>
+  <li><a href="#generic-types" id="toc-generic-types" class="nav-link" data-scroll-target="#generic-types"><span class="header-section-number">6.2</span> Generic types</a></li>
+  <li><a href="#working-out-a-type-by-hand" id="toc-working-out-a-type-by-hand" class="nav-link" data-scroll-target="#working-out-a-type-by-hand"><span class="header-section-number">6.3</span> Working out a type by hand</a></li>
+  <li><a href="#when-f-needs-help-type-annotations" id="toc-when-f-needs-help-type-annotations" class="nav-link" data-scroll-target="#when-f-needs-help-type-annotations"><span class="header-section-number">6.4</span> When F# needs help: type annotations</a></li>
+  </ul></li>
+  <li><a href="#beyond-f" id="toc-beyond-f" class="nav-link" data-scroll-target="#beyond-f"><span class="header-section-number">7</span> Beyond F#</a></li>
+  <li><a href="#going-further-optional" id="toc-going-further-optional" class="nav-link" data-scroll-target="#going-further-optional"><span class="header-section-number">8</span> Going further (optional)</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="header-section-number">9</span> Summary</a></li>
+  <li><a href="#further-reading-optional" id="toc-further-reading-optional" class="nav-link" data-scroll-target="#further-reading-optional"><span class="header-section-number">10</span> Further reading (optional)</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../weeks/week02/notes.html">Week 2 · Functions, Recursion, and Types</a></li><li class="breadcrumb-item"><a href="../../weeks/week02/notes.html">Notes</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Week 2 · Functions, Recursion, and Reading Types</h1>
+<p class="subtitle lead">Lecture notes</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="callout callout-style-simple callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>After this week you should be able to
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li>write recursive functions using a four-step <strong>recipe</strong>, and trace them by hand;</li>
+<li>write case analysis with <strong><code>match</code></strong>, and read a <code>match</code> as a set of equations;</li>
+<li>recognise the common ways recursion goes wrong, and fix them;</li>
+<li>read a function type with several arrows, and use <strong>partial application</strong>;</li>
+<li>work out the type of a function by hand, including <strong>generic</strong> types like <code>'a -&gt; 'a</code>;</li>
+<li>add a <strong>type annotation</strong> where F# needs one.</li>
+</ul>
+</div>
+</div>
+<p>This week is about practice more than new ideas. Recursion is the main way functional programs repeat things, and the aim is for writing recursive functions to become <strong>second nature</strong>. That only comes from writing many of them. So these notes contain many small worked examples, all following the same recipe, and the drills and lab contain many more. Do as many as you can.</p>
+<section id="functions-that-call-themselves" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Functions that call themselves</h1>
+<section id="a-definition-in-terms-of-itself" class="level2" data-number="1.1">
+<h2 data-number="1.1" class="anchored" data-anchor-id="a-definition-in-terms-of-itself"><span class="header-section-number">1.1</span> A definition in terms of itself</h2>
+<p>The factorial of a natural number <span class="math inline">n</span> is the product <span class="math inline">1 \times 2 \times \cdots \times n</span>, written <span class="math inline">n!</span>. The “<span class="math inline">\cdots</span>” is fine on paper, but a program needs something more precise. Notice that</p>
+<p><span class="math display">
+5! = 5 \times \underbrace{4 \times 3 \times 2 \times 1}_{4!} = 5 \times 4!
+</span></p>
+<p>In general, <span class="math inline">n! = n \times (n-1)!</span>. The factorial of <span class="math inline">n</span> is defined in terms of the factorial of a <strong>smaller</strong> number. Together with a starting point, this gives a complete definition:</p>
+<p><span class="math display">
+n! =
+\begin{cases}
+1 &amp; \text{if } n = 0 \\
+n \times (n-1)! &amp; \text{if } n &gt; 0
+\end{cases}
+</span></p>
+<p>(By convention <span class="math inline">0! = 1</span>, the empty product.) This translates directly into F#:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> factIf n =</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">if</span> n = <span class="dv">0</span> <span class="kw">then</span> <span class="dv">1</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">else</span> n * factIf <span class="op">(</span>n - <span class="dv">1</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>A function that calls itself is <strong>recursive</strong>. In F# you must say so with the keyword <code>rec</code>. Without it, the name <code>factIf</code> isn’t bound yet inside its own body:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode fsi code-with-copy"><code class="sourceCode fsharp"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>&gt; <span class="kw">let</span> fact n = <span class="kw">if</span> n = <span class="dv">0</span> <span class="kw">then</span> <span class="dv">1</span> <span class="kw">else</span> n * fact <span class="op">(</span>n - <span class="dv">1</span><span class="op">)</span>;;</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">let</span> fact n = <span class="kw">if</span> n = <span class="dv">0</span> <span class="kw">then</span> <span class="dv">1</span> <span class="kw">else</span> n * fact <span class="op">(</span>n - <span class="dv">1</span><span class="op">)</span>;;</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  --------------------------------------^^^^</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>error FS0039: The value <span class="kw">or</span> constructor 'fact' is <span class="kw">not</span> defined.</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="tracing-a-recursive-function" class="level2" data-number="1.2">
+<h2 data-number="1.2" class="anchored" data-anchor-id="tracing-a-recursive-function"><span class="header-section-number">1.2</span> Tracing a recursive function</h2>
+<p>Recursion needs no new evaluation rules. The substitution rules from Week 1 already cover it:</p>
+<pre class="trace"><code>   factIf 3
+⇝ if 3 = 0 then 1 else 3 * factIf (3 - 1)                 (3)
+⇝ 3 * factIf (3 - 1)                                      (4),(5)
+⇝ 3 * factIf 2                                            (4)
+⇝ 3 * (if 2 = 0 then 1 else 2 * factIf (2 - 1))           (3)
+⇝ 3 * (2 * factIf 1)                                      (4),(5),(4)
+⇝ 3 * (2 * (1 * factIf 0))                                same steps again
+⇝ 3 * (2 * (1 * (if 0 = 0 then 1 else 0 * factIf (0 - 1))))   (3)
+⇝ 3 * (2 * (1 * 1))                                       (4),(5)
+⇝ 3 * (2 * 1)
+⇝ 3 * 2
+⇝ 6</code></pre>
+<p>Look at the <strong>shape</strong> of this trace. The expression first <strong>grows</strong>, as each call leaves a multiplication waiting for the result of the next call. When the base case is reached, it <strong>shrinks</strong> again, as the waiting multiplications are done from the inside out. The computer has to remember that waiting work somewhere; it uses a region of memory called the <strong>call stack</strong>. Week 7 looks at what that costs, and how to avoid it.</p>
+</section>
+<section id="the-shortcut-tracing-with-equations" class="level2" data-number="1.3">
+<h2 data-number="1.3" class="anchored" data-anchor-id="the-shortcut-tracing-with-equations"><span class="header-section-number">1.3</span> The shortcut: tracing with equations</h2>
+<p>Full traces are useful when you are unsure. Once you are comfortable, you can skip the <code>if</code> steps and write only the equations:</p>
+<pre class="trace"><code>factIf 3 = 3 * factIf 2
+         = 3 * (2 * factIf 1)
+         = 3 * (2 * (1 * factIf 0))
+         = 3 * (2 * (1 * 1))
+         = 6</code></pre>
+<p>This is how most functional programmers check a recursive function in their head. Each line is still a valid substitution, and each line has the same value.</p>
+</section>
+</section>
+<section id="a-recipe-for-recursive-functions" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> A recipe for recursive functions</h1>
+<p>Every recursive function in this course can be written with the same four steps. Do them in this order, <strong>every time</strong>, until you do them without thinking.</p>
+<ol type="1">
+<li><strong>Type</strong> — Say what goes in and what comes out. Writing it down is half of understanding the problem.</li>
+<li><strong>Base case</strong> — Find the input that is so small the answer is obvious, and write that answer.</li>
+<li><strong>Recursive case</strong> — For a bigger input, <em>assume the function already works</em> for a smaller input, and build the answer from that smaller answer.</li>
+<li><strong>Check</strong> — Trace a small input. Then ask: does every recursive call get <em>closer to the base case</em>?</li>
+</ol>
+<p>Step 3 is where most people get stuck, because it feels like cheating. How can you use a function you are still writing? The trick is not to think about how the smaller call works; <em>trust</em> it, the way you trust <code>sqrt</code> without knowing its code. Your only job is: <em>if</em> the smaller call gives the right answer, does your formula give the right answer for the bigger input? Step 4 then checks that the trust is justified.</p>
+<section id="the-recipe-in-action-sumto" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="the-recipe-in-action-sumto"><span class="header-section-number">2.1</span> The recipe in action: <code>sumTo</code></h2>
+<p><em>Problem:</em> add up all the numbers from <code>1</code> to <code>n</code>.</p>
+<ol type="1">
+<li><strong>Type</strong> — A number in, a number out: <code>int -&gt; int</code>.</li>
+<li><strong>Base case</strong> — The sum of no numbers is <code>0</code>, so <code>sumTo 0 = 0</code>.</li>
+<li><strong>Recursive case</strong> — Suppose <code>sumTo (n - 1)</code> correctly gives <span class="math inline">1 + 2 + \cdots + (n-1)</span>. Then adding <code>n</code> gives the answer for <code>n</code>: <code>sumTo n = n + sumTo (n - 1)</code>.</li>
+<li><strong>Check</strong> — <code>sumTo 3 = 3 + sumTo 2 = 3 + (2 + sumTo 1) = 3 + (2 + (1 + sumTo 0)) = 3 + (2 + (1 + 0)) = 6</code>. Each call subtracts 1, so any <code>n ≥ 0</code> eventually reaches <code>0</code>.</li>
+</ol>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> sumToIf n =</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">if</span> n = <span class="dv">0</span> <span class="kw">then</span> <span class="dv">0</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">else</span> n + sumToIf <span class="op">(</span>n - <span class="dv">1</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+</section>
+<section id="another-way-to-write-it-match" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Another way to write it: <code>match</code></h1>
+<p>Look again at the math definition of factorial. It is a list of <strong>cases</strong>: one equation for <code>0</code>, one for everything else. F# has a construct that lets us write exactly that, <code>match</code>:</p>
+<div class="quarto-layout-panel" data-layout-ncol="2">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<p><span class="math display">
+\begin{aligned}
+0! &amp;= 1 \\
+n! &amp;= n \times (n-1)!
+\end{aligned}
+</span></p>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> fact n =</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> n <span class="kw">with</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    | <span class="dv">0</span> -&gt; <span class="dv">1</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    | n -&gt; n * fact <span class="op">(</span>n - <span class="dv">1</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+</div>
+<p>Read <code>match n with</code> as “look at <code>n</code>, and consider these cases”. Each line starting with <code>|</code> is a <strong>rule</strong> of the form <code>pattern -&gt; expression</code>:</p>
+<ul>
+<li>The rule <code>| 0 -&gt; 1</code> says: <em>if <code>n</code> is <code>0</code>, the result is <code>1</code>.</em></li>
+<li>The rule <code>| n -&gt; n * fact (n - 1)</code> says: <em>otherwise, call the value <code>n</code>, and the result is <code>n * fact (n - 1)</code>.</em></li>
+</ul>
+<p>The F# code is the math definition, with slightly different punctuation. This is one of the things that makes functional languages pleasant: a definition you would write on paper can often be typed in almost as it is.</p>
+<section id="how-a-match-is-evaluated" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="how-a-match-is-evaluated"><span class="header-section-number">3.1</span> How a <code>match</code> is evaluated</h2>
+<p>We add one rule to the substitution model from Week 1:</p>
+<ol start="7" type="1">
+<li><strong>Evaluate a <code>match</code></strong> by first evaluating the value being matched. Then try the patterns <strong>from top to bottom</strong>. For the <strong>first</strong> pattern that fits, bind the names in the pattern, and continue with that rule’s expression.</li>
+</ol>
+<pre class="trace"><code>   fact 3
+⇝ match 3 with | 0 -&gt; 1 | n -&gt; n * fact (n - 1)       (3)
+⇝ 3 * fact (3 - 1)                                    (7) 3 isn't 0; n ↦ 3
+⇝ 3 * fact 2                                          (4)
+⇝ 3 * (2 * fact 1)                                    (3),(7),(4)
+⇝ 3 * (2 * (1 * fact 0))                              (3),(7),(4)
+⇝ 3 * (2 * (1 * 1))                                   (3),(7) 0 fits the first rule
+⇝ 6                                                   (4)</code></pre>
+<p>A <code>match</code> is an expression, just like <code>if</code>, so the same rule applies: <strong>every rule must produce a value of the same type</strong>.</p>
+</section>
+<section id="kinds-of-patterns" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="kinds-of-patterns"><span class="header-section-number">3.2</span> Kinds of patterns</h2>
+<p>This week we use four kinds of patterns. Week 4 adds many more.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Pattern</th>
+<th>Example</th>
+<th>Matches</th>
+<th>Binds a name?</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Constant</strong></td>
+<td><code>0</code>, <code>"Sunday"</code>, <code>true</code></td>
+<td>only that value</td>
+<td>no</td>
+</tr>
+<tr class="even">
+<td><strong>Name</strong></td>
+<td><code>n</code>, <code>x</code>, <code>day</code></td>
+<td>any value</td>
+<td>yes: the name is bound to the value</td>
+</tr>
+<tr class="odd">
+<td><strong>Wildcard</strong></td>
+<td><code>_</code></td>
+<td>any value</td>
+<td>no (“I don’t care what it is”)</td>
+</tr>
+<tr class="even">
+<td><strong>Or</strong></td>
+<td><code>"Saturday"</code> | <code>"Sunday"</code></td>
+<td>either alternative</td>
+<td>only if both sides bind the same names</td>
+</tr>
+</tbody>
+</table>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> isWeekend day =</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> day <span class="kw">with</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    | <span class="st">"Saturday"</span> -&gt; <span class="kw">true</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    | <span class="st">"Sunday"</span> -&gt; <span class="kw">true</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    | _ -&gt; <span class="kw">false</span>            //<span class="co"> _ matches anything</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>With an or-pattern, the first two rules can be combined:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> isWeekend' day =</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> day <span class="kw">with</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    | <span class="st">"Saturday"</span> | <span class="st">"Sunday"</span> -&gt; <span class="kw">true</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    | _ -&gt; <span class="kw">false</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="guards-conditions-on-a-rule" class="level2" data-number="3.3">
+<h2 data-number="3.3" class="anchored" data-anchor-id="guards-conditions-on-a-rule"><span class="header-section-number">3.3</span> Guards: conditions on a rule</h2>
+<p>Sometimes a case isn’t a single value but a <em>range</em>: “all positive numbers”. Add a <strong>guard</strong> with <code>when</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> sign n =</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> n <span class="kw">with</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    | <span class="dv">0</span> -&gt; <span class="dv">0</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    | n <span class="kw">when</span> n &gt; <span class="dv">0</span> -&gt; <span class="dv">1</span>     //<span class="co"> guard: only if n &gt; 0</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    | _ -&gt; <span class="dv">-1</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The rule <code>| n when n &gt; 0 -&gt; 1</code> applies only if the pattern fits <em>and</em> the condition is true. If the guard is false, F# moves on to the next rule.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Why does the pattern <code>n</code> reuse the parameter’s name?
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>In <code>fact</code>, the parameter is <code>n</code>, and the second rule’s pattern is also <code>n</code>. The pattern makes a <strong>new</strong> binding, to the same value, which shadows the old one (Week 1). That’s harmless here, and it keeps the code close to the math. You could just as well write <code>| k -&gt; k * fact (k - 1)</code>, or <code>| _ -&gt; n * fact (n - 1)</code>, which uses the parameter itself.</p>
+</div>
+</div>
+</section>
+<section id="the-compiler-checks-your-cases" class="level2" data-number="3.4">
+<h2 data-number="3.4" class="anchored" data-anchor-id="the-compiler-checks-your-cases"><span class="header-section-number">3.4</span> The compiler checks your cases</h2>
+<p>Because a <code>match</code> is a list of cases, F# can check the list for you. If some value is not covered, you get a warning with an example:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode fsi code-with-copy"><code class="sourceCode fsharp"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>&gt; <span class="kw">let</span> describe n =</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>      <span class="kw">match</span> n <span class="kw">with</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>      | <span class="dv">0</span> -&gt; <span class="st">"zero"</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>      | <span class="dv">1</span> -&gt; <span class="st">"one"</span>;;</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>warning FS0025: Incomplete pattern matches on this expression. For example, the</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>value <span class="ch">'2'</span> may indicate a case <span class="kw">not</span> covered by the pattern<span class="op">(</span>s<span class="op">)</span>.</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>If a rule can never be reached because an earlier rule already catches everything, you get a different warning:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode fsi code-with-copy"><code class="sourceCode fsharp"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>&gt; <span class="kw">let</span> <span class="kw">rec</span> bad n =</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>      <span class="kw">match</span> n <span class="kw">with</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>      | n -&gt; n * bad <span class="op">(</span>n - <span class="dv">1</span><span class="op">)</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>      | <span class="dv">0</span> -&gt; <span class="dv">1</span>;;</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>      | <span class="dv">0</span> -&gt; <span class="dv">1</span>;;</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  ------^</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>warning FS0026: This rule will never be matched</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Take both warnings seriously. The second one describes a real bug: <code>bad</code> never reaches its base case, and runs until the program crashes (see below). This checking becomes much more powerful in Week 4, when we define our own types.</p>
+</section>
+<section id="if-or-match" class="level2" data-number="3.5">
+<h2 data-number="3.5" class="anchored" data-anchor-id="if-or-match"><span class="header-section-number">3.5</span> <code>if</code> or <code>match</code>?</h2>
+<p>Both are expressions and both work. As a rule of thumb:</p>
+<ul>
+<li>use <strong><code>if</code></strong> for a single yes-or-no condition, such as <code>if balance &lt; 0 then … else …</code>;</li>
+<li>use <strong><code>match</code></strong> when you are <strong>distinguishing cases</strong> of a value, which is what almost every recursive function does.</li>
+</ul>
+<p>For the rest of this course, recursive functions are written with <code>match</code>.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>The <code>function</code> shorthand
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Matching on the last parameter is so common that F# has a shorthand. <code>function</code> means “a function whose argument is matched immediately”:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> factF =</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">function</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    | <span class="dv">0</span> -&gt; <span class="dv">1</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    | n -&gt; n * factF <span class="op">(</span>n - <span class="dv">1</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This is the same as <code>fact</code>. You will see this style in other people’s F# code. In FSI the argument appears with the made-up name <code>_arg1</code> (<code>val factF: _arg1: int -&gt; int</code>), because we never named it.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="the-recursion-ladder" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> The recursion ladder</h1>
+<p>Each example below adds one new wrinkle. Work through them with the recipe in mind: for each one, cover the code, write down the four steps yourself, and only then compare.</p>
+<section id="two-parameters-power" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="two-parameters-power"><span class="header-section-number">4.1</span> Two parameters: <code>power</code></h2>
+<p><em>Problem:</em> compute <span class="math inline">x^n</span> for a <code>float</code> <span class="math inline">x</span> and a natural number <span class="math inline">n</span>.</p>
+<p><span class="math display">
+\begin{aligned}
+x^0 &amp;= 1 \\
+x^n &amp;= x \times x^{n-1}
+\end{aligned}
+</span></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> power x n =</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> n <span class="kw">with</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    | <span class="dv">0</span> -&gt; <span class="fl">1.0</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    | n -&gt; x * power x <span class="op">(</span>n - <span class="dv">1</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ol type="1">
+<li><strong>Type</strong> — <code>float -&gt; int -&gt; float</code>. The base case <code>1.0</code> decides that the result is a <code>float</code>, and <code>x * …</code> makes <code>x</code> a <code>float</code> too.</li>
+<li><strong>Base case</strong> — <code>power x 0 = 1.0</code>.</li>
+<li><strong>Recursive case</strong> — trust <code>power x (n - 1)</code>, and multiply by one more <code>x</code>.</li>
+<li><strong>Check</strong> — <code>power 2.0 3 = 2.0 * (2.0 * (2.0 * 1.0)) = 8.0</code>. Only <code>n</code> gets smaller; <code>x</code> is passed along unchanged.</li>
+</ol>
+</section>
+<section id="building-text-repeat" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="building-text-repeat"><span class="header-section-number">4.2</span> Building text: <code>repeat</code></h2>
+<p><em>Problem:</em> <code>repeat "ab" 3</code> should give <code>"ababab"</code>.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> repeat s n =</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> n <span class="kw">with</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    | <span class="dv">0</span> -&gt; <span class="st">""</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    | n -&gt; s + repeat s <span class="op">(</span>n - <span class="dv">1</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ol type="1">
+<li><strong>Type</strong> — <code>string -&gt; int -&gt; string</code>.</li>
+<li><strong>Base case</strong> — repeating a string zero times gives the empty string <code>""</code>.</li>
+<li><strong>Recursive case</strong> — one copy of <code>s</code>, followed by <code>n - 1</code> copies.</li>
+<li><strong>Check</strong> — <code>repeat "ab" 2 = "ab" + ("ab" + "") = "abab"</code>.</li>
+</ol>
+<p>Recursion isn’t only for arithmetic. Any result you can build piece by piece can be built recursively.</p>
+</section>
+<section id="two-base-cases-binary" class="level2" data-number="4.3">
+<h2 data-number="4.3" class="anchored" data-anchor-id="two-base-cases-binary"><span class="header-section-number">4.3</span> Two base cases: <code>binary</code></h2>
+<p><em>Problem:</em> write a natural number in base 2, as a string: <code>binary 6 = "110"</code>.</p>
+<p>The last binary digit of <code>n</code> is <code>n % 2</code>, and the digits before it are the binary digits of <code>n / 2</code>. For example, <span class="math inline">6 = 2 \times 3 + 0</span>, so <code>binary 6</code> is <code>binary 3</code> followed by <code>"0"</code>.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> binary n =</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> n <span class="kw">with</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    | <span class="dv">0</span> -&gt; <span class="st">"0"</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    | <span class="dv">1</span> -&gt; <span class="st">"1"</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    | n -&gt; binary <span class="op">(</span>n / <span class="dv">2</span><span class="op">)</span> + <span class="dt">string</span> <span class="op">(</span>n % <span class="dv">2</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ol type="1">
+<li><strong>Type</strong> — <code>int -&gt; string</code>.</li>
+<li><strong>Base cases</strong> — <code>0</code> and <code>1</code> are their own binary digits. We need both: if only <code>0</code> were a base case, <code>binary 1</code> would give <code>binary 0 + "1" = "01"</code>.</li>
+<li><strong>Recursive case</strong> — the digits of <code>n / 2</code>, then the last digit.</li>
+<li><strong>Check</strong> — <code>binary 6 = binary 3 + "0" = (binary 1 + "1") + "0" = "1" + "1" + "0" = "110"</code>. Here the input gets smaller by <em>halving</em>, not by subtracting 1. That’s fine: halving a positive number repeatedly always reaches <code>1</code>.</li>
+</ol>
+</section>
+<section id="smaller-isnt-always-n---1-digitsum" class="level2" data-number="4.4">
+<h2 data-number="4.4" class="anchored" data-anchor-id="smaller-isnt-always-n---1-digitsum"><span class="header-section-number">4.4</span> “Smaller” isn’t always <code>n - 1</code>: <code>digitSum</code></h2>
+<p><em>Problem:</em> add up the decimal digits of a number: <code>digitSum 1234 = 1 + 2 + 3 + 4 = 10</code>.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> digitSum n =</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> n <span class="kw">with</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    | n <span class="kw">when</span> n &lt; <span class="dv">10</span> -&gt; n</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    | n -&gt; n % <span class="dv">10</span> + digitSum <span class="op">(</span>n / <span class="dv">10</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ol type="1">
+<li><strong>Type</strong> — <code>int -&gt; int</code>.</li>
+<li><strong>Base case</strong> — a number below 10 has one digit, which is its own digit sum. The base case is a <em>range</em>, so it uses a guard.</li>
+<li><strong>Recursive case</strong> — the last digit is <code>n % 10</code>; the other digits form the number <code>n / 10</code>.</li>
+<li><strong>Check</strong> — <code>digitSum 1234 = 4 + digitSum 123 = 4 + (3 + digitSum 12) = 4 + (3 + (2 + 1)) = 10</code>. Each call removes one digit.</li>
+</ol>
+</section>
+<section id="no-waiting-work-gcd" class="level2" data-number="4.5">
+<h2 data-number="4.5" class="anchored" data-anchor-id="no-waiting-work-gcd"><span class="header-section-number">4.5</span> No waiting work: <code>gcd</code></h2>
+<p><em>Problem:</em> the greatest common divisor of two natural numbers. Euclid’s method (from around 300 BC) is based on a neat fact: the GCD of <span class="math inline">a</span> and <span class="math inline">b</span> is the same as the GCD of <span class="math inline">b</span> and the remainder <span class="math inline">a \bmod b</span>.</p>
+<p><span class="math display">
+\begin{aligned}
+\gcd(a, 0) &amp;= a \\
+\gcd(a, b) &amp;= \gcd(b,\ a \bmod b)
+\end{aligned}
+</span></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> gcd a b =</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> b <span class="kw">with</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    | <span class="dv">0</span> -&gt; a</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    | b -&gt; gcd b <span class="op">(</span>a % b<span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre class="trace"><code>gcd 48 18 = gcd 18 12      48 % 18 = 12
+          = gcd 12 6       18 % 12 = 6
+          = gcd 6 0        12 % 6  = 0
+          = 6</code></pre>
+<p>Compare this trace with <code>fact</code>’s. Here, nothing is left waiting: each call’s answer <em>is</em> the next call’s answer, so the expression never grows. Keep that difference in mind. It becomes important in Week 7.</p>
+<p><em>Check:</em> why does <code>gcd</code> stop? The second argument always gets smaller, because a remainder <code>a % b</code> is always less than <code>b</code>. A natural number can’t get smaller forever, so it must reach <code>0</code>.</p>
+</section>
+<section id="two-recursive-calls-fib" class="level2" data-number="4.6">
+<h2 data-number="4.6" class="anchored" data-anchor-id="two-recursive-calls-fib"><span class="header-section-number">4.6</span> Two recursive calls: <code>fib</code></h2>
+<p><em>Problem:</em> the Fibonacci numbers <code>0, 1, 1, 2, 3, 5, 8, 13, …</code>, where each is the sum of the two before it.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> fib n =</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> n <span class="kw">with</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    | <span class="dv">0</span> -&gt; <span class="dv">0</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    | <span class="dv">1</span> -&gt; <span class="dv">1</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    | n -&gt; fib <span class="op">(</span>n - <span class="dv">1</span><span class="op">)</span> + fib <span class="op">(</span>n - <span class="dv">2</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This is correct, and it reads exactly like the definition. But try it in FSI with timing switched on (<code>#time "on";;</code>):</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode fsi code-with-copy"><code class="sourceCode fsharp"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>&gt; fib <span class="dv">40</span>;;</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>Real: <span class="dv">00</span>:<span class="dv">00</span>:<span class="fl">01.002</span>, CPU: <span class="dv">00</span>:<span class="dv">00</span>:<span class="fl">00.980</span>, GC gen0: <span class="dv">0</span>, gen1: <span class="dv">0</span>, gen2: <span class="dv">0</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> it: <span class="dt">int</span> = <span class="dv">102334155</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>&gt; fib <span class="dv">42</span>;;</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>Real: <span class="dv">00</span>:<span class="dv">00</span>:<span class="fl">02.254</span>, CPU: <span class="dv">00</span>:<span class="dv">00</span>:<span class="fl">02.226</span>, GC gen0: <span class="dv">0</span>, gen1: <span class="dv">0</span>, gen2: <span class="dv">0</span></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> it: <span class="dt">int</span> = <span class="dv">267914296</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Each extra step makes it about 1.6 times slower, so <code>fib 50</code> would take minutes. The reason becomes clear if you draw the calls: <code>fib 5</code> calls <code>fib 4</code> and <code>fib 3</code>; <code>fib 4</code> calls <code>fib 3</code> <em>again</em>, and so on. The same values are computed over and over. A function can be correct and still be a bad program. In Week 7 we will write a version that takes microseconds.</p>
+</section>
+</section>
+<section id="when-recursion-goes-wrong" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> When recursion goes wrong</h1>
+<section id="no-way-to-reach-the-base-case" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="no-way-to-reach-the-base-case"><span class="header-section-number">5.1</span> No way to reach the base case</h2>
+<p>What does <code>fact (-1)</code> do? The only base case is <code>0</code>, and <code>-1, -2, -3, …</code> never reach it. Each call waits for the next one, and the call stack fills up until the program crashes:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode fsi code-with-copy"><code class="sourceCode fsharp"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>Stack overflow.</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>Repeated <span class="dv">261720</span> times:</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>--------------------------------</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>   at FSI_0001<span class="kw">.</span>fact<span class="op">(</span>Int32<span class="op">)</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>--------------------------------</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The same thing happens if the recursive call doesn’t make the input smaller, for example <code>n * fact n</code> instead of <code>n * fact (n - 1)</code>, or if the base case comes <em>after</em> a rule that catches everything (the FS0026 warning above).</p>
+<p>When a function is only meant for some inputs, say so explicitly. <code>failwith</code> stops the program with a message:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> factSafe n =</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> n <span class="kw">with</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    | n <span class="kw">when</span> n &lt; <span class="dv">0</span> -&gt; failwith <span class="st">"factSafe: negative input"</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>    | <span class="dv">0</span> -&gt; <span class="dv">1</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>    | n -&gt; n * factSafe <span class="op">(</span>n - <span class="dv">1</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>A clear error is better than a crash deep inside the recursion. (Stopping the program is still a blunt tool. Week 4 shows how a function can <em>return</em> “no answer” instead.)</p>
+</section>
+<section id="numbers-that-are-too-big" class="level2" data-number="5.2">
+<h2 data-number="5.2" class="anchored" data-anchor-id="numbers-that-are-too-big"><span class="header-section-number">5.2</span> Numbers that are too big</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode fsi code-with-copy"><code class="sourceCode fsharp"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>&gt; fact <span class="dv">12</span>;;</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> it: <span class="dt">int</span> = <span class="dv">479001600</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>&gt; fact <span class="dv">13</span>;;</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> it: <span class="dt">int</span> = <span class="dv">1932053504</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The real value of <span class="math inline">13!</span> is 6,227,020,800. An <code>int</code> holds only values up to about 2.1 billion (<span class="math inline">2^{31} - 1</span>), and arithmetic that goes past that <strong>wraps around silently</strong>. <code>fact 20</code> even comes out negative. For bigger numbers, use <code>int64</code> (64-bit integers), whose literals end in <code>L</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> factBig <span class="op">(</span>n: <span class="dt">int64</span><span class="op">)</span> : <span class="dt">int64</span> =</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> n <span class="kw">with</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>    | <span class="dv">0</span>L -&gt; <span class="dv">1</span>L</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>    | n -&gt; n * factBig <span class="op">(</span>n - <span class="dv">1</span>L<span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>factBig 20L</code> is <code>2432902008176640000L</code>. (For unlimited size there is also <code>bigint</code>, with literals like <code>20I</code>.)</p>
+</section>
+</section>
+<section id="reading-types" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> Reading types</h1>
+<section id="many-arrows-currying" class="level2" data-number="6.1">
+<h2 data-number="6.1" class="anchored" data-anchor-id="many-arrows-currying"><span class="header-section-number">6.1</span> Many arrows: currying</h2>
+<p>In Week 1 we saw that a function with two parameters has a type with two arrows:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode fsi code-with-copy"><code class="sourceCode fsharp"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>&gt; <span class="kw">let</span> add x y = x + y;;</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> add: x: <span class="dt">int</span> -&gt; y: <span class="dt">int</span> -&gt; <span class="dt">int</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Arrows group <strong>to the right</strong>, so <code>int -&gt; int -&gt; int</code> means <code>int -&gt; (int -&gt; int)</code>. Read literally: <code>add</code> takes an <code>int</code> and returns <em>a function</em> that takes another <code>int</code> and returns an <code>int</code>. And that is exactly how F# treats it. Give <code>add</code> just one argument, and you get that function back:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> add x y = x + y</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> add5 = add <span class="dv">5</span>              //<span class="co"> a function still waiting for y</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> eight = add5 <span class="dv">3</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode fsi code-with-copy"><code class="sourceCode fsharp"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>&gt; <span class="kw">let</span> add5 = add <span class="dv">5</span>;;</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> add5: <span class="op">(</span><span class="dt">int</span> -&gt; <span class="dt">int</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>add5</code> is a function waiting for its second argument. Applying a function to only some of its arguments is called <strong>partial application</strong>. Functions that take their arguments one at a time like this are called <strong>curried</strong>, after the logician Haskell Curry. In F#, every function with several parameters is curried.</p>
+<p>Function application groups <strong>to the left</strong>, which is the mirror image of the arrows: <code>add 5 3</code> means <code>(add 5) 3</code>. First <code>add 5</code> produces a function; then that function is applied to <code>3</code>.</p>
+<p>Partial application is useful whenever the first arguments describe a <em>kind</em> of job and the last one is the data:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> twoTo = power <span class="fl">2.0</span>         //<span class="co"> int -&gt; float: powers of two</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> kilo = twoTo <span class="dv">10</span>           //<span class="co"> 1024.0</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>And here is the promise from Week 1: <code>printfn</code> with a format string is a function waiting for the values to print:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> say = printfn <span class="st">"Hello, %s!"</span>   //<span class="co"> string -&gt; unit</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="sourceCode fsi code-with-copy"><code class="sourceCode fsharp"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>&gt; <span class="kw">let</span> say = printfn <span class="st">"Hello, %s!"</span>;;</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> say: <span class="op">(</span><span class="dt">string</span> -&gt; <span class="dt">unit</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>F# reads the <code>%s</code> in the format string and works out that <code>say</code> needs a <code>string</code>. <code>%d</code> would ask for an <code>int</code>, and <code>%f</code> for a <code>float</code>. A mismatch is a type error, caught before the program runs.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Put the “setting” parameters first
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Because of partial application, parameter <strong>order</strong> matters. Put the parameters that stay the same across many uses <em>first</em>, and the one that varies <em>last</em>. <code>power x n</code> with <code>x</code> first lets you make <code>twoTo = power 2.0</code>. If <code>n</code> came first, you could make “the cube of any number” instead. Choose the order that makes the useful partial applications possible. This matters a lot from Week 5 onward.</p>
+</div>
+</div>
+</section>
+<section id="generic-types" class="level2" data-number="6.2">
+<h2 data-number="6.2" class="anchored" data-anchor-id="generic-types"><span class="header-section-number">6.2</span> Generic types</h2>
+<p>Some functions don’t care what type their argument has:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> identity x = x</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> first x y = x</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> alwaysZero _ = <span class="dv">0</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb33"><pre class="sourceCode fsi code-with-copy"><code class="sourceCode fsharp"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>&gt; <span class="kw">let</span> identity x = x;;</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> identity: x: 'a -&gt; 'a</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>&gt; <span class="kw">let</span> first x y = x;;</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> first: x: 'a -&gt; y: 'b -&gt; 'a</span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>&gt; <span class="kw">let</span> alwaysZero _ = <span class="dv">0</span>;;</span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> alwaysZero: 'a -&gt; <span class="dt">int</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>A name starting with an apostrophe, like <code>'a</code> (read “alpha”, or just “a”), is a <strong>type variable</strong>. It stands for <em>any</em> type. <code>identity: 'a -&gt; 'a</code> works for <code>int</code>, <code>string</code>, or anything else, and the type promises that the result has the <strong>same</strong> type as the argument. <code>first: 'a -&gt; 'b -&gt; 'a</code> takes two arguments of possibly different types and returns something of the first one’s type. Such functions are called <strong>generic</strong> (the technical term is <em>parametric polymorphism</em>).</p>
+<p>A generic type says a lot about what a function can do. A function of type <code>'a -&gt; 'a</code> knows nothing about its argument: it can’t add to it, print it, or compare it. So all it can do is hand it back. The type alone tells you what <code>identity</code> does.</p>
+<p>Parentheses in a type mark a parameter that is itself a function:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> twice f x = f <span class="op">(</span>f x<span class="op">)</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> plus2 = twice <span class="op">(</span>add <span class="dv">1</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb35"><pre class="sourceCode fsi code-with-copy"><code class="sourceCode fsharp"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>&gt; <span class="kw">let</span> twice f x = f <span class="op">(</span>f x<span class="op">)</span>;;</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> twice: f: <span class="op">(</span>'a -&gt; 'a<span class="op">)</span> -&gt; x: 'a -&gt; 'a</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>twice</code> takes a function <code>f</code> (of type <code>'a -&gt; 'a</code>) and a value <code>x</code>, and applies <code>f</code> two times. <code>twice (add 1)</code> is a function that adds 2. Functions that take or return functions are called <strong>higher-order</strong> functions; they are the subject of Week 5.</p>
+</section>
+<section id="working-out-a-type-by-hand" class="level2" data-number="6.3">
+<h2 data-number="6.3" class="anchored" data-anchor-id="working-out-a-type-by-hand"><span class="header-section-number">6.3</span> Working out a type by hand</h2>
+<p>F# finds types by looking at how each parameter is <em>used</em>. You can do the same thing, with a small method:</p>
+<ol type="1">
+<li><strong>Unknowns</strong> — Give each parameter, and the result, a placeholder type.</li>
+<li><strong>Clues</strong> — Go through the body. Each use of a parameter is a clue: <code>x + 1</code> means <code>x</code> is an <code>int</code>; <code>x &gt; 0</code> too; <code>s + "!"</code> means <code>s</code> is a <code>string</code>; an <code>if</code> condition is a <code>bool</code>; both branches of an <code>if</code> or all rules of a <code>match</code> have the result type.</li>
+<li><strong>Combine</strong> — Put the clues together. If two clues disagree, that’s a type error.</li>
+<li><strong>Generalise</strong> — Any placeholder with no clues at all stays generic: <code>'a</code>, <code>'b</code>, …</li>
+</ol>
+<p><em>Example.</em> <code>let pick x y = if x &gt; 0 then y + 1 else y * 2</code></p>
+<ul>
+<li>Unknowns: <code>x : ?1</code>, <code>y : ?2</code>, result <code>?3</code>.</li>
+<li>Clues: <code>x &gt; 0</code> compares <code>x</code> with an <code>int</code>, so <code>?1 = int</code>. <code>y + 1</code> gives <code>?2 = int</code>, and that branch has type <code>int</code>, so <code>?3 = int</code>. The <code>else</code> branch <code>y * 2</code> is also <code>int</code>, which agrees.</li>
+<li>Result: <code>pick: x: int -&gt; y: int -&gt; int</code>.</li>
+</ul>
+<p><em>Example.</em> <code>repeat</code> from the ladder:</p>
+<ul>
+<li><code>match n with | 0 -&gt; …</code> compares <code>n</code> with <code>0</code>, so <code>n : int</code>.</li>
+<li>The first rule’s result is <code>""</code>, so the result type is <code>string</code>.</li>
+<li>The second rule is <code>s + repeat s (n - 1)</code>. The result is a <code>string</code>, and <code>+</code> needs both sides to have the same type, so <code>s : string</code>.</li>
+<li>Result: <code>repeat: s: string -&gt; n: int -&gt; string</code>.</li>
+</ul>
+</section>
+<section id="when-f-needs-help-type-annotations" class="level2" data-number="6.4">
+<h2 data-number="6.4" class="anchored" data-anchor-id="when-f-needs-help-type-annotations"><span class="header-section-number">6.4</span> When F# needs help: type annotations</h2>
+<p>Occasionally the clues aren’t enough, and you add the type yourself with a <strong>type annotation</strong>: <code>(name: type)</code> for a parameter, or <code>: type</code> after the parameters for the result.</p>
+<p><strong>Number types.</strong> As we saw in Week 1, when nothing decides between <code>int</code> and <code>float</code>, arithmetic assumes <code>int</code>. An annotation settles it:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb36"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> squareF <span class="op">(</span>x: <span class="dt">float</span><span class="op">)</span> = x * x</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> cube x : <span class="dt">float</span> = x * x * x      //<span class="co"> annotate the result instead</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Methods and properties.</strong> To look up <code>.Length</code> or <code>.ToUpper()</code> on a value, F# must already know the value’s type at that point:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb37"><pre class="sourceCode fsi code-with-copy"><code class="sourceCode fsharp"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>&gt; <span class="kw">let</span> len s = s.Length;;</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">let</span> len s = s.Length;;</span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>  ------------^^^^^^^^</span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>error FS0072: Lookup on <span class="kw">object</span> <span class="kw">of</span> indeterminate <span class="kw">type</span> based on information prior</span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a><span class="kw">to</span> this program point. A <span class="kw">type</span> annotation may be needed prior <span class="kw">to</span> this program</span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a>point <span class="kw">to</span> constrain the <span class="kw">type</span> <span class="kw">of</span> the <span class="kw">object</span>.</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb38"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> shout <span class="op">(</span>s: <span class="dt">string</span><span class="op">)</span> = s.ToUpper<span class="op">()</span> + <span class="st">"!"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Annotations are also useful as documentation, even when F# doesn’t need them. Writing the type first, as step 1 of the recipe suggests, and then letting the compiler confirm it, is a good habit.</p>
+</section>
+</section>
+<section id="beyond-f" class="level1" data-number="7">
+<h1 data-number="7"><span class="header-section-number">7</span> Beyond F#</h1>
+<p><strong>Pattern matching</strong> has spread to most modern languages, though the details differ:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Language</th>
+<th>Factorial by cases</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Haskell</strong></td>
+<td><code>fact 0 = 1</code> and <code>fact n = n * fact (n - 1)</code>: literally the equations</td>
+</tr>
+<tr class="even">
+<td><strong>Rust</strong></td>
+<td><code>match n { 0 =&gt; 1, n =&gt; n * fact(n - 1) }</code></td>
+</tr>
+<tr class="odd">
+<td><strong>Kotlin</strong></td>
+<td><code>when (n) { 0 -&gt; 1; else -&gt; n * fact(n - 1) }</code></td>
+</tr>
+<tr class="even">
+<td><strong>C#</strong></td>
+<td><code>n switch { 0 =&gt; 1, _ =&gt; n * Fact(n - 1) }</code></td>
+</tr>
+<tr class="odd">
+<td><strong>Java</strong> (21+)</td>
+<td><code>switch</code> with patterns and <code>when</code> guards</td>
+</tr>
+<tr class="even">
+<td><strong>Python</strong> (3.10+)</td>
+<td><code>match n:</code> with <code>case 0:</code> and <code>case _:</code></td>
+</tr>
+</tbody>
+</table>
+<p>Two caveats when you use recursion in these languages. First, many of them limit recursion depth much more strictly than .NET does: Python stops at about 1000 nested calls by default. Recursion is still the right way to <em>think</em> about many problems, but for long-running repetition in those languages you may need a loop. (Week 7 shows how F# avoids the problem.) Second, they differ in how carefully they check that your cases are complete: Rust and Kotlin insist on it, Java and C# check it for some kinds of <code>switch</code> (C# gives a warning, as F# does), and Python doesn’t check at all.</p>
+<p><strong>Currying</strong> is the default in F#, OCaml, and Haskell. Elsewhere you can simulate it with a function that returns a function, such as <code>const add = x =&gt; y =&gt; x + y;</code> in JavaScript, or use a helper such as Python’s <code>functools.partial</code>. The <em>idea</em>, fixing some arguments now and the rest later, is useful everywhere.</p>
+<p><strong>Type inference.</strong> Rust, Kotlin, TypeScript, Swift, and C# infer the types of local variables, but require you to write the types of function parameters. F#, OCaml, and Haskell infer parameter types too, using the method from this week (known as <em>Hindley–Milner</em> type inference). That’s why F# code can look as light as a scripting language while being fully type-checked.</p>
+</section>
+<section id="going-further-optional" class="level1" data-number="8">
+<h1 data-number="8"><span class="header-section-number">8</span> Going further (optional)</h1>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Why does a recursive function stop?
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-5" class="callout-5-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Step 4 of the recipe asks whether each call gets “closer to the base case”. This can be made precise. Find a <strong>measure</strong>: a natural number, computed from the arguments, that gets strictly smaller with every recursive call. For <code>fact</code> it is <code>n</code>; for <code>binary</code> it is also <code>n</code> (halved each time); for <code>digitSum</code> it is the number of digits; for <code>gcd</code> it is the second argument <code>b</code>. Since natural numbers can’t decrease forever, the recursion must stop. If you can’t find a measure, be suspicious. Some functions have no known measure at all. The Collatz function in this week’s lab is a famous example: nobody has ever proved that it stops for every input.</p>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Proving a recursive function correct
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-6" class="callout-6-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>The recipe’s “trust the smaller call” has a formal version: <strong>mathematical induction</strong>. Claim: <code>sumTo n</code> <span class="math inline">= \dfrac{n(n+1)}{2}</span> for every <span class="math inline">n \ge 0</span>.</p>
+<ul>
+<li><em>Base case.</em> <code>sumTo 0 = 0</code>, and <span class="math inline">\frac{0 \cdot 1}{2} = 0</span>.</li>
+<li><em>Step.</em> Assume the claim holds for <span class="math inline">n - 1</span>, that is, <code>sumTo (n - 1)</code> <span class="math inline">= \frac{(n-1)n}{2}</span>. Then <span class="math display">
+\texttt{sumTo } n = n + \frac{(n-1)n}{2} = \frac{2n + n^2 - n}{2} = \frac{n(n+1)}{2}.
+</span></li>
+</ul>
+<p>That’s the whole proof. The structure of the proof follows the structure of the function exactly: one part per rule of the <code>match</code>. This connection between recursion and induction runs through all of functional programming.</p>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-7-contents" aria-controls="callout-7" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Functions that call each other
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-7" class="callout-7-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Two functions can be defined in terms of each other, joined with <code>and</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb39"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> isEven n =</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> n <span class="kw">with</span></span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>    | <span class="dv">0</span> -&gt; <span class="kw">true</span></span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>    | n -&gt; isOdd <span class="op">(</span>n - <span class="dv">1</span><span class="op">)</span></span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a><span class="kw">and</span> isOdd n =</span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> n <span class="kw">with</span></span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a>    | <span class="dv">0</span> -&gt; <span class="kw">false</span></span>
+<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>    | n -&gt; isEven <span class="op">(</span>n - <span class="dv">1</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This is called <strong>mutual recursion</strong>. It is not a practical way to test evenness (<code>n % 2 = 0</code> is better), but the pattern is useful for problems that have two kinds of case feeding into each other, such as parsers.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="summary" class="level1" data-number="9">
+<h1 data-number="9"><span class="header-section-number">9</span> Summary</h1>
+<ul>
+<li>A <strong>recursive</strong> function calls itself on a smaller input; it needs <code>let rec</code>.</li>
+<li>The <strong>recipe</strong>: type, base case, recursive case (<em>trust</em> the smaller call), check (trace, and make sure the input really gets smaller).</li>
+<li><strong><code>match</code></strong> writes case analysis as rules, <code>| pattern -&gt; expression</code>, tried top to bottom. It often mirrors the math definition directly.</li>
+<li>Patterns this week: constants, names, <code>_</code>, or-patterns, and <code>when</code> guards. F# warns about <strong>incomplete</strong> matches (FS0025) and <strong>unreachable</strong> rules (FS0026).</li>
+<li>Recursion goes wrong when the base case can’t be reached (<strong>stack overflow</strong>), and <code>int</code> arithmetic <strong>overflows silently</strong> past about 2.1 billion.</li>
+<li><code>a -&gt; b -&gt; c</code> means <code>a -&gt; (b -&gt; c)</code>: functions are <strong>curried</strong>, and <strong>partial application</strong> gives a function waiting for the rest.</li>
+<li><code>'a</code> is a <strong>type variable</strong>; <strong>generic</strong> functions work for any type, and their types limit what they can do.</li>
+<li>Work out a type by collecting <strong>clues</strong> from how each parameter is used; add an <strong>annotation</strong> when the clues aren’t enough.</li>
+</ul>
+</section>
+<section id="further-reading-optional" class="level1" data-number="10">
+<h1 data-number="10"><span class="header-section-number">10</span> Further reading (optional)</h1>
+<ul>
+<li>Isaac Abraham, <em>F# in Action</em>, section 3.2 (type inference) and chapter 6 (functions).</li>
+<li>Scott Wlaschin, <em>F# for Fun and Profit</em>, the “Thinking functionally” series, especially the posts on currying, partial application, and function signatures.</li>
+<li>Microsoft’s F# language reference: <em>Match Expressions</em>, <em>Recursive Functions: The rec Keyword</em>, and <em>Functions</em>.</li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../../weeks/week01/lab.html" class="pagination-link" aria-label="Lab">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Lab</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../../weeks/week02/slides.html" class="pagination-link" aria-label="Slides">
+        <span class="nav-page-text">Slides</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

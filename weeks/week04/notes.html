@@ -1,0 +1,1430 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Week 4 · Modeling Data: Records, Unions, and Option – Functional Programming</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../weeks/week04/slides.html" rel="next">
+<link href="../../weeks/week03/lab.html" rel="prev">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-11cd2b351f627a0e63fc448ff4a87ab1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-bc7666a66758628ea7247e883a9a1c09.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script defer="" src="../../vendor/katex/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <link rel="stylesheet" href="../../vendor/katex/katex.min.css">
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar docked quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../weeks/week04/notes.html">Week 4 · Records, Unions, and Option</a></li><li class="breadcrumb-item"><a href="../../weeks/week04/notes.html">Notes</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../../">Functional Programming</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Course home</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Week 1 · Programs as Expressions</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week01/notes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notes</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week01/slides.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Slides</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week01/drills.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Drills</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week01/lab.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lab</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Week 2 · Functions, Recursion, and Types</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week02/notes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notes</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week02/slides.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Slides</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week02/drills.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Drills</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week02/lab.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lab</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Week 3 · Lists, Tuples, and Patterns</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week03/notes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notes</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week03/slides.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Slides</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week03/drills.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Drills</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week03/lab.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lab</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Week 4 · Records, Unions, and Option</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week04/notes.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Notes</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week04/slides.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Slides</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week04/drills.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Drills</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week04/lab.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lab</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul class="collapse">
+  <li><a href="#the-cash-register-with-tuples" id="toc-the-cash-register-with-tuples" class="nav-link active" data-scroll-target="#the-cash-register-with-tuples"><span class="header-section-number">1</span> The cash register, with tuples</a></li>
+  <li><a href="#records" id="toc-records" class="nav-link" data-scroll-target="#records"><span class="header-section-number">2</span> Records</a>
+  <ul class="collapse">
+  <li><a href="#changing-a-record" id="toc-changing-a-record" class="nav-link" data-scroll-target="#changing-a-record"><span class="header-section-number">2.1</span> “Changing” a record</a></li>
+  <li><a href="#records-in-patterns" id="toc-records-in-patterns" class="nav-link" data-scroll-target="#records-in-patterns"><span class="header-section-number">2.2</span> Records in patterns</a></li>
+  <li><a href="#equality" id="toc-equality" class="nav-link" data-scroll-target="#equality"><span class="header-section-number">2.3</span> Equality</a></li>
+  <li><a href="#a-pitfall-fields-with-the-same-names" id="toc-a-pitfall-fields-with-the-same-names" class="nav-link" data-scroll-target="#a-pitfall-fields-with-the-same-names"><span class="header-section-number">2.4</span> A pitfall: fields with the same names</a></li>
+  </ul></li>
+  <li><a href="#the-cash-register-with-records" id="toc-the-cash-register-with-records" class="nav-link" data-scroll-target="#the-cash-register-with-records"><span class="header-section-number">3</span> The cash register, with records</a></li>
+  <li><a href="#unions-one-of-several-kinds" id="toc-unions-one-of-several-kinds" class="nav-link" data-scroll-target="#unions-one-of-several-kinds"><span class="header-section-number">4</span> Unions: one of several kinds</a>
+  <ul class="collapse">
+  <li><a href="#taking-unions-apart" id="toc-taking-unions-apart" class="nav-link" data-scroll-target="#taking-unions-apart"><span class="header-section-number">4.1</span> Taking unions apart</a></li>
+  <li><a href="#the-compiler-checks-every-case" id="toc-the-compiler-checks-every-case" class="nav-link" data-scroll-target="#the-compiler-checks-every-case"><span class="header-section-number">4.2</span> The compiler checks every case</a></li>
+  <li><a href="#unions-without-data-enumerations" id="toc-unions-without-data-enumerations" class="nav-link" data-scroll-target="#unions-without-data-enumerations"><span class="header-section-number">4.3</span> Unions without data: enumerations</a></li>
+  <li><a href="#cases-with-different-data" id="toc-cases-with-different-data" class="nav-link" data-scroll-target="#cases-with-different-data"><span class="header-section-number">4.4</span> Cases with different data</a></li>
+  </ul></li>
+  <li><a href="#types-as-sets-counting-values" id="toc-types-as-sets-counting-values" class="nav-link" data-scroll-target="#types-as-sets-counting-values"><span class="header-section-number">5</span> Types as sets: counting values</a>
+  <ul class="collapse">
+  <li><a href="#why-count" id="toc-why-count" class="nav-link" data-scroll-target="#why-count"><span class="header-section-number">5.1</span> Why count?</a></li>
+  </ul></li>
+  <li><a href="#option-a-value-that-might-not-be-there" id="toc-option-a-value-that-might-not-be-there" class="nav-link" data-scroll-target="#option-a-value-that-might-not-be-there"><span class="header-section-number">6</span> Option: a value that might not be there</a>
+  <ul class="collapse">
+  <li><a href="#functions-that-might-have-no-answer" id="toc-functions-that-might-have-no-answer" class="nav-link" data-scroll-target="#functions-that-might-have-no-answer"><span class="header-section-number">6.1</span> Functions that might have no answer</a></li>
+  <li><a href="#using-an-option-always-both-cases" id="toc-using-an-option-always-both-cases" class="nav-link" data-scroll-target="#using-an-option-always-both-cases"><span class="header-section-number">6.2</span> Using an option: always both cases</a></li>
+  <li><a href="#the-antidote-to-null" id="toc-the-antidote-to-null" class="nav-link" data-scroll-target="#the-antidote-to-null"><span class="header-section-number">6.3</span> The antidote to <code>null</code></a></li>
+  <li><a href="#options-at-the-boundaries" id="toc-options-at-the-boundaries" class="nav-link" data-scroll-target="#options-at-the-boundaries"><span class="header-section-number">6.4</span> Options at the boundaries</a></li>
+  <li><a href="#the-cash-register-without-crashing" id="toc-the-cash-register-without-crashing" class="nav-link" data-scroll-target="#the-cash-register-without-crashing"><span class="header-section-number">6.5</span> The cash register, without crashing</a></li>
+  </ul></li>
+  <li><a href="#recursive-unions" id="toc-recursive-unions" class="nav-link" data-scroll-target="#recursive-unions"><span class="header-section-number">7</span> Recursive unions</a></li>
+  <li><a href="#nested-patterns" id="toc-nested-patterns" class="nav-link" data-scroll-target="#nested-patterns"><span class="header-section-number">8</span> Nested patterns</a></li>
+  <li><a href="#beyond-f" id="toc-beyond-f" class="nav-link" data-scroll-target="#beyond-f"><span class="header-section-number">9</span> Beyond F#</a></li>
+  <li><a href="#going-further-optional" id="toc-going-further-optional" class="nav-link" data-scroll-target="#going-further-optional"><span class="header-section-number">10</span> Going further (optional)</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="header-section-number">11</span> Summary</a></li>
+  <li><a href="#further-reading-optional" id="toc-further-reading-optional" class="nav-link" data-scroll-target="#further-reading-optional"><span class="header-section-number">12</span> Further reading (optional)</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../weeks/week04/notes.html">Week 4 · Records, Unions, and Option</a></li><li class="breadcrumb-item"><a href="../../weeks/week04/notes.html">Notes</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Week 4 · Modeling Data: Records, Unions, and Option</h1>
+<p class="subtitle lead">Lecture notes</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="callout callout-style-simple callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>After this week you should be able to
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li>define <strong>record</strong> types, build and update records, and take them apart with patterns;</li>
+<li>define <strong>union</strong> types (choices), and handle every case with <code>match</code>;</li>
+<li>use the compiler’s <strong>completeness checks</strong> to find every place a new case must be handled;</li>
+<li><strong>count the values</strong> of a type, and use the count to spot impossible states;</li>
+<li>use <strong><code>option</code></strong> for “there might be no answer”, and handle both cases, every time;</li>
+<li>combine records, unions, lists, and options in <strong>nested patterns</strong>.</li>
+</ul>
+</div>
+</div>
+<p>So far, our data has been built from the types F# provides: numbers, strings, tuples, lists. This week we define <strong>our own types</strong>. With just two ways of building types, records and unions, you can describe almost any kind of data precisely. Many functional programmers consider this the single most useful idea in the whole paradigm, and it has been spreading into other languages quickly.</p>
+<p>We start with a problem, and solve it twice.</p>
+<section id="the-cash-register-with-tuples" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> The cash register, with tuples</h1>
+<p>The problem (adapted from Hansen): <em>A cash register knows, for each article code, the article’s name and price. A purchase is a list of items, each with a number of pieces and an article code. Make the bill: for each item, the number of pieces, the article name, and the total price for that line; plus the grand total.</em></p>
+<p>With the tools from Week 3, we can model this with tuples, and give the types names with <strong>type abbreviations</strong>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ArticleCode = <span class="dt">string</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ArticleName = <span class="dt">string</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Price = <span class="dt">int</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Register = <span class="op">(</span>ArticleCode * <span class="op">(</span>ArticleName * Price<span class="op">))</span> list</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> NoPieces = <span class="dt">int</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Item = NoPieces * ArticleCode</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Purchase = Item list</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Info = NoPieces * ArticleName * Price</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Bill = Info list * Price</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>type Price = int</code> doesn’t create a new type. It only gives <code>int</code> a second name, to make our intentions readable. Here is some data, and the two functions we need:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> register =</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">[</span> <span class="op">(</span><span class="st">"a1"</span>, <span class="op">(</span><span class="st">"iced coffee"</span>, <span class="dv">45</span><span class="op">))</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>      <span class="op">(</span><span class="st">"a2"</span>, <span class="op">(</span><span class="st">"sandwich"</span>, <span class="dv">39</span><span class="op">))</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>      <span class="op">(</span><span class="st">"a3"</span>, <span class="op">(</span><span class="st">"water"</span>, <span class="dv">10</span><span class="op">))</span> <span class="op">]</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> purchase = <span class="op">[</span> <span class="op">(</span><span class="dv">2</span>, <span class="st">"a1"</span><span class="op">)</span>; <span class="op">(</span><span class="dv">1</span>, <span class="st">"a3"</span><span class="op">)</span> <span class="op">]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> findArticle code register =</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> register <span class="kw">with</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    | <span class="op">[]</span> -&gt; failwith <span class="op">(</span><span class="st">"unknown article code "</span> + code<span class="op">)</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    | <span class="op">(</span>c, article<span class="op">)</span> :: _ <span class="kw">when</span> c = code -&gt; article</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    | _ :: rest -&gt; findArticle code rest</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> makeBill register purchase =</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> purchase <span class="kw">with</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    | <span class="op">[]</span> -&gt; <span class="op">([]</span>, <span class="dv">0</span><span class="op">)</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    | <span class="op">(</span>pieces, code<span class="op">)</span> :: rest -&gt;</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> <span class="op">(</span>name, price<span class="op">)</span> = findArticle code register</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> lineTotal = pieces * price</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> <span class="op">(</span>lines, total<span class="op">)</span> = makeBill register rest</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>        <span class="op">((</span>pieces, name, lineTotal<span class="op">)</span> :: lines, lineTotal + total<span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>makeBill register purchase</code> gives <code>([(2, "iced coffee", 90); (1, "water", 10)], 100)</code>. It works. But look at the type F# infers for <code>makeBill</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode fsi code-with-copy"><code class="sourceCode fsharp"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> makeBill:</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  register: <span class="op">(</span><span class="dt">string</span> * <span class="op">(</span>'a * <span class="dt">int</span><span class="op">))</span> list -&gt;</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    purchase: <span class="op">(</span><span class="dt">int</span> * <span class="dt">string</span><span class="op">)</span> list -&gt; <span class="op">(</span><span class="dt">int</span> * 'a * <span class="dt">int</span><span class="op">)</span> list * <span class="dt">int</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Which <code>int</code> is the number of pieces? Which is the price, and which the line total? In <code>(int * 'a * int) list * int</code>, you can only tell from the <em>position</em> of each value, and you have to remember what each position means. Swap two <code>int</code>s by mistake and the program still compiles. Our type abbreviations didn’t help F#, because <code>Price</code> and <code>NoPieces</code> are both just <code>int</code> to it.</p>
+<p>What we want is a way to <strong>name</strong> the parts.</p>
+</section>
+<section id="records" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Records</h1>
+<p>A <strong>record</strong> is like a tuple whose parts have names, called <strong>fields</strong>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Article = <span class="op">{</span> Name: <span class="dt">string</span>; Price: <span class="dt">int</span> <span class="op">}</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> coffee = <span class="op">{</span> Name = <span class="st">"iced coffee"</span>; Price = <span class="dv">45</span> <span class="op">}</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> price = coffee.Price                        //<span class="co"> 45</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode fsi code-with-copy"><code class="sourceCode fsharp"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>&gt; <span class="kw">let</span> coffee = <span class="op">{</span> Name = <span class="st">"iced coffee"</span>; Price = <span class="dv">45</span> <span class="op">}</span>;;</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> coffee: Article = <span class="op">{</span> Name = <span class="st">"iced coffee"</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>                        Price = <span class="dv">45</span> <span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li><code>type Article = { Name: string; Price: int }</code> <strong>defines a new type</strong> with two fields. Unlike a type abbreviation, this really is a new type: an <code>Article</code> is not a tuple, and not any other record.</li>
+<li><code>{ Name = …; Price = … }</code> <strong>creates</strong> a record. F# works out from the field names that it’s an <code>Article</code>.</li>
+<li><code>coffee.Price</code> <strong>reads</strong> a field.</li>
+</ul>
+<section id="changing-a-record" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="changing-a-record"><span class="header-section-number">2.1</span> “Changing” a record</h2>
+<p>Records are immutable, like everything else. To “change” one, make a copy with some fields replaced:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> promo = <span class="op">{</span> coffee <span class="kw">with</span> Price = <span class="dv">40</span> <span class="op">}</span>   //<span class="co"> a NEW record</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>{ coffee with Price = 40 }</code> means “a record just like <code>coffee</code>, but with <code>Price = 40</code>”. The original <code>coffee</code> still costs 45.</p>
+</section>
+<section id="records-in-patterns" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="records-in-patterns"><span class="header-section-number">2.2</span> Records in patterns</h2>
+<p>A record can be taken apart with a pattern, naming the fields you want:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> describe <span class="op">{</span> Name = name; Price = price <span class="op">}</span> =</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    $<span class="st">"{name}: {price} baht"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The pattern <code>{ Name = name; Price = price }</code> binds the two fields to <code>name</code> and <code>price</code>. You only need to mention the fields you use.</p>
+</section>
+<section id="equality" class="level2" data-number="2.3">
+<h2 data-number="2.3" class="anchored" data-anchor-id="equality"><span class="header-section-number">2.3</span> Equality</h2>
+<p>Records are compared by their <strong>contents</strong>, field by field, just like tuples:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> same = coffee = <span class="op">{</span> Name = <span class="st">"iced coffee"</span>; Price = <span class="dv">45</span> <span class="op">}</span>   //<span class="co"> true</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>(This is not true in every language. In Java or C#, two ordinary objects with the same contents are usually <em>not</em> equal unless you write extra code, or use their newer <code>record</code> feature. See <em>Beyond F#</em>.)</p>
+</section>
+<section id="a-pitfall-fields-with-the-same-names" class="level2" data-number="2.4">
+<h2 data-number="2.4" class="anchored" data-anchor-id="a-pitfall-fields-with-the-same-names"><span class="header-section-number">2.4</span> A pitfall: fields with the same names</h2>
+<p>F# finds the record type from the field names. If two record types have the same field names, it uses the one defined <strong>last</strong>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Point = <span class="op">{</span> X: <span class="dt">float</span>; Y: <span class="dt">float</span> <span class="op">}</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Vector = <span class="op">{</span> X: <span class="dt">float</span>; Y: <span class="dt">float</span> <span class="op">}</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> p = <span class="op">{</span> X = <span class="fl">1.0</span>; Y = <span class="fl">2.0</span> <span class="op">}</span>            //<span class="co"> a Vector!</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> q : Point = <span class="op">{</span> X = <span class="fl">1.0</span>; Y = <span class="fl">2.0</span> <span class="op">}</span>    //<span class="co"> annotated</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode fsi code-with-copy"><code class="sourceCode fsharp"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> p: Vector = <span class="op">{</span> X = <span class="fl">1.0</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>                  Y = <span class="fl">2.0</span> <span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>When field names are shared, say which type you mean with an annotation, as for <code>q</code>. The same applies to function parameters: <code>let makeLine register (item: Item) = …</code> below annotates <code>item</code> so that <code>item.Code</code> is unambiguous. Annotating record parameters is a good habit in any case.</p>
+</section>
+</section>
+<section id="the-cash-register-with-records" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> The cash register, with records</h1>
+<p>Now the same problem with named fields:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Article = <span class="op">{</span> Name: <span class="dt">string</span>; Price: <span class="dt">int</span> <span class="op">}</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Item = <span class="op">{</span> Code: <span class="dt">string</span>; Pieces: <span class="dt">int</span> <span class="op">}</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Line =</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span> Description: <span class="dt">string</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>      Count: <span class="dt">int</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>      Amount: <span class="dt">int</span> <span class="op">}</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Bill = <span class="op">{</span> Lines: Line list; Total: <span class="dt">int</span> <span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> register =</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">[</span> <span class="op">(</span><span class="st">"a1"</span>, <span class="op">{</span> Name = <span class="st">"iced coffee"</span>; Price = <span class="dv">45</span> <span class="op">})</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>      <span class="op">(</span><span class="st">"a2"</span>, <span class="op">{</span> Name = <span class="st">"sandwich"</span>; Price = <span class="dv">39</span> <span class="op">})</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>      <span class="op">(</span><span class="st">"a3"</span>, <span class="op">{</span> Name = <span class="st">"water"</span>; Price = <span class="dv">10</span> <span class="op">})</span> <span class="op">]</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> purchase =</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">[</span> <span class="op">{</span> Code = <span class="st">"a1"</span>; Pieces = <span class="dv">2</span> <span class="op">}</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>      <span class="op">{</span> Code = <span class="st">"a3"</span>; Pieces = <span class="dv">1</span> <span class="op">}</span> <span class="op">]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> findArticle code register =</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> register <span class="kw">with</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    | <span class="op">[]</span> -&gt; failwith <span class="op">(</span><span class="st">"unknown article code "</span> + code<span class="op">)</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    | <span class="op">(</span>c, article<span class="op">)</span> :: _ <span class="kw">when</span> c = code -&gt; article</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    | _ :: rest -&gt; findArticle code rest</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> makeLine register <span class="op">(</span>item: Item<span class="op">)</span> =</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> article = findArticle item.Code register</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span> Description = article.Name</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>      Count = item.Pieces</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>      Amount = item.Pieces * article.Price <span class="op">}</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> makeLines register items =</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> items <span class="kw">with</span></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>    | <span class="op">[]</span> -&gt; <span class="op">[]</span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>    | item :: rest -&gt;</span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>        makeLine register item :: makeLines register rest</span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> total lines =</span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> lines <span class="kw">with</span></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>    | <span class="op">[]</span> -&gt; <span class="dv">0</span></span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>    | line :: rest -&gt; line.Amount + total rest</span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> makeBill register items =</span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> lines = makeLines register items</span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span> Lines = lines; Total = total lines <span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Compare the two versions:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>Tuple version</th>
+<th>Record version</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>a bill line</td>
+<td><code>(2, "iced coffee", 90)</code></td>
+<td><code>{ Description = "iced coffee"; Count = 2; Amount = 90 }</code></td>
+</tr>
+<tr class="even">
+<td>the bill’s type</td>
+<td><code>(int * string * int) list * int</code></td>
+<td><code>Bill</code></td>
+</tr>
+<tr class="odd">
+<td>mixing up two <code>int</code>s</td>
+<td>compiles silently</td>
+<td>a type error, or visibly wrong code</td>
+</tr>
+<tr class="even">
+<td>reading a part</td>
+<td>a pattern, by position</td>
+<td><code>line.Amount</code>, by name</td>
+</tr>
+</tbody>
+</table>
+<p>The logic is the same; the records make it <strong>readable</strong>, both for people and for the compiler. The record version also splits the work into small functions (<code>makeLine</code>, <code>makeLines</code>, <code>total</code>), each of which is easy to test on its own.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>When to use a tuple, when a record
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Tuples are fine for small, short-lived groupings, especially function results like <code>(quotient, remainder)</code> or <code>(lines, total)</code>, where the meaning is obvious from the context. As soon as a grouping is stored, passed around, or has several parts of the same type, give it a record type with named fields.</p>
+</div>
+</div>
+</section>
+<section id="unions-one-of-several-kinds" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Unions: one of several kinds</h1>
+<p>Records say “an article has a name <strong>and</strong> a price”. Often we need to say “a thing is <strong>either</strong> this <strong>or</strong> that”. Hansen’s example: <em>a shape is either a circle, a rectangle, or a triangle.</em></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Shape =</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    | Circle <span class="kw">of</span> radius: <span class="dt">float</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    | Rectangle <span class="kw">of</span> width: <span class="dt">float</span> * height: <span class="dt">float</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    | Triangle <span class="kw">of</span> a: <span class="dt">float</span> * b: <span class="dt">float</span> * c: <span class="dt">float</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This defines a <strong>union</strong> type (also called a <em>discriminated union</em>, or <em>choice type</em>) with three <strong>cases</strong>. Each case has a name, called its <strong>constructor</strong>, and optionally some data. The field names (<code>radius</code>, <code>width</code>, …) are optional documentation. Creating a value means choosing one case:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> wheel = Circle <span class="fl">0.3</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> door = Rectangle <span class="op">(</span><span class="fl">0.9</span>, <span class="fl">2.0</span><span class="op">)</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> sail = Triangle <span class="op">(</span><span class="fl">3.0</span>, <span class="fl">4.0</span>, <span class="fl">5.0</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode fsi code-with-copy"><code class="sourceCode fsharp"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>&gt; Circle <span class="fl">2.0</span>;;</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> it: Shape = Circle <span class="fl">2.0</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>&gt; Rectangle <span class="op">(</span><span class="fl">3.0</span>, <span class="fl">4.0</span><span class="op">)</span>;;</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> it: Shape = Rectangle <span class="op">(</span><span class="fl">3.0</span>, <span class="fl">4.0</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>All three are values of the same type, <code>Shape</code>. So a <code>Shape list</code> can contain circles, rectangles, and triangles together.</p>
+<section id="taking-unions-apart" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="taking-unions-apart"><span class="header-section-number">4.1</span> Taking unions apart</h2>
+<p>Constructors are also patterns. A constructor pattern matches only values built with that constructor, and binds the data inside:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> area shape =</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> shape <span class="kw">with</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    | Circle r -&gt; System<span class="kw">.</span>Math<span class="kw">.</span>PI * r * r</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    | Rectangle <span class="op">(</span>w, h<span class="op">)</span> -&gt; w * h</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>    | Triangle <span class="op">(</span>a, b, c<span class="op">)</span> -&gt;</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> s = <span class="op">(</span>a + b + c<span class="op">)</span> / <span class="fl">2.0</span>                //<span class="co"> Heron's formula</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>        sqrt <span class="op">(</span>s * <span class="op">(</span>s - a<span class="op">)</span> * <span class="op">(</span>s - b<span class="op">)</span> * <span class="op">(</span>s - c<span class="op">))</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The <code>match</code> has exactly one rule per case: the code follows the structure of the type, just as list functions followed the structure of lists in Week 3. In fact, that is no coincidence (see <em>Recursive unions</em> below).</p>
+</section>
+<section id="the-compiler-checks-every-case" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="the-compiler-checks-every-case"><span class="header-section-number">4.2</span> The compiler checks every case</h2>
+<p>This is where <code>match</code> really pays off. Suppose we forget a case:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode fsi code-with-copy"><code class="sourceCode fsharp"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>&gt; <span class="kw">let</span> area shape =</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>      <span class="kw">match</span> shape <span class="kw">with</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>      | Circle r -&gt; System<span class="kw">.</span>Math<span class="kw">.</span>PI * r * r;;</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>warning FS0025: Incomplete pattern matches on this expression. For example, the</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>value 'Rectangle <span class="op">(</span>_, _<span class="op">)</span>' may indicate a case <span class="kw">not</span> covered by the pattern<span class="op">(</span>s<span class="op">)</span>.</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>F# tells you exactly which case is missing. Now imagine a program with fifty functions that match on <code>Shape</code>, and a new requirement: support ellipses too. Add <code>| Ellipse of a: float * b: float</code> to the type, recompile, and <strong>every</strong> <code>match</code> that doesn’t handle ellipses gets a warning, pointing to the line. In languages without this check, you find the places you forgot one bug report at a time.</p>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Treat FS0025 as an error
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>An incomplete match compiles, but crashes at run time with <code>MatchFailureException</code> when the missing case turns up. In this course, <strong>every FS0025 warning is a bug</strong>, and labs are marked that way. (Real projects often make the compiler treat it as an error.)</p>
+</div>
+</div>
+</section>
+<section id="unions-without-data-enumerations" class="level2" data-number="4.3">
+<h2 data-number="4.3" class="anchored" data-anchor-id="unions-without-data-enumerations"><span class="header-section-number">4.3</span> Unions without data: enumerations</h2>
+<p>A union’s cases don’t have to carry data. Hansen’s months:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Month =</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    | January | February | March | April | May | June</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    | July | August | September | October | November | December</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Recall <code>daysInMonth year month</code> from the Week 1 lab, which took the month as an <code>int</code> and had to return <code>0</code> for “month 13”. With a <code>Month</code> type, there <strong>is</strong> no month 13:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> isLeapYear year =</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">(</span>year % <span class="dv">4</span> = <span class="dv">0</span> &amp;&amp; year % <span class="dv">100</span> &lt;&gt; <span class="dv">0</span><span class="op">)</span> || year % <span class="dv">400</span> = <span class="dv">0</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> daysIn year month =</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> month <span class="kw">with</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    | February -&gt; <span class="kw">if</span> isLeapYear year <span class="kw">then</span> <span class="dv">29</span> <span class="kw">else</span> <span class="dv">28</span></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>    | April | June | September | November -&gt; <span class="dv">30</span></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>    | _ -&gt; <span class="dv">31</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The problem of invalid months hasn’t been handled, it has been <strong>removed</strong>: an invalid month can’t even be written. (Converting a <em>number</em> from the user into a <code>Month</code> can still fail, of course. We handle that with <code>option</code>, below.)</p>
+</section>
+<section id="cases-with-different-data" class="level2" data-number="4.4">
+<h2 data-number="4.4" class="anchored" data-anchor-id="cases-with-different-data"><span class="header-section-number">4.4</span> Cases with different data</h2>
+<p>Each case can carry its own kind of data. How a customer pays at the register:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Payment =</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    | Cash <span class="kw">of</span> received: <span class="dt">int</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    | Card <span class="kw">of</span> lastFour: <span class="dt">string</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    | PromptPay <span class="kw">of</span> phone: <span class="dt">string</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> receiptLine total payment =</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> payment <span class="kw">with</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>    | Cash received -&gt; $<span class="st">"Cash {received}, change {received - total}"</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>    | Card lastFour -&gt; $<span class="st">"Card ending {lastFour}"</span></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>    | PromptPay phone -&gt; $<span class="st">"PromptPay to {phone}"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Cash needs the amount received, a card only its last four digits, PromptPay a phone number. With a union, each case holds exactly what it needs, and nothing else. Compare the alternative, a record with a field for each possibility, where most fields are meaningless most of the time.</p>
+</section>
+</section>
+<section id="types-as-sets-counting-values" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Types as sets: counting values</h1>
+<p>Week 3 promised to make sense of the <code>*</code> in tuple types. Think of a type as the <strong>set of its possible values</strong>, and count them. Write <span class="math inline">|T|</span> for the number of values of type <span class="math inline">T</span>:</p>
+<ul>
+<li><span class="math inline">|\texttt{bool}| = 2</span> and <span class="math inline">|\texttt{unit}| = 1</span>.</li>
+<li><span class="math inline">|\texttt{Light}| = 3</span>, if <code>Light</code> is the union <code>Red | Amber | Green</code>.</li>
+<li><span class="math inline">|\texttt{Month}| = 12</span>.</li>
+</ul>
+<p><strong>Tuples and records multiply.</strong> A value of <code>bool * Month</code> is a <code>bool</code> <em>and</em> a <code>Month</code>: any of the 2 choices combined with any of the 12, so <span class="math inline">|\texttt{bool * Month}| = 2 \times 12 = 24</span>. In general</p>
+<p><span class="math display">
+|A \mathbin{*} B| = |A| \times |B|
+</span></p>
+<p>which is why the tuple type is written with <code>*</code>, like the Cartesian product <span class="math inline">A \times B</span>. A record with fields of types <span class="math inline">A</span> and <span class="math inline">B</span> has the same count. Records and tuples are <strong>product types</strong>, or “AND types”.</p>
+<p><strong>Unions add.</strong> A value of a union is <em>one</em> of its cases, so you add up the possibilities of each case:</p>
+<p><span class="math display">
+|\;\texttt{C1 of A | C2 of B}\;| = |A| + |B|
+</span></p>
+<p>A case without data counts as 1. Unions are <strong>sum types</strong>, or “OR types”. (Together, product and sum types are called <strong>algebraic data types</strong>. Now you know where the name comes from.)</p>
+<section id="why-count" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="why-count"><span class="header-section-number">5.1</span> Why count?</h2>
+<p>Counting reveals <strong>impossible states</strong> that a type allows. A traffic light has three lamps. Modeled as “which lamps are on”:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>//<span class="co"> red, amber, green: each lamp on or off</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> LampsOn = <span class="dt">bool</span> * <span class="dt">bool</span> * <span class="dt">bool</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>That type has <span class="math inline">2 \times 2 \times 2 = 8</span> values, but a real light only shows 3 of them. The other 5 (all off, red <em>and</em> green, …) are values your program can create, and every function has to decide what to do with them. The union has exactly the 3 values that exist:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Light =</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    | Red</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    | Amber</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>    | Green</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> next light =</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> light <span class="kw">with</span></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>    | Red -&gt; Green</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>    | Green -&gt; Amber</span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>    | Amber -&gt; Red</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>next</code> needs no checks for impossible combinations, because there aren’t any. Good types make illegal states <strong>unrepresentable</strong>. Week 9 builds a whole design approach on this idea.</p>
+</section>
+</section>
+<section id="option-a-value-that-might-not-be-there" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> Option: a value that might not be there</h1>
+<p>In Weeks 1–3, some functions had no good answer for some inputs:</p>
+<ul>
+<li><code>daysInMonth 2025 13</code> returned <code>0</code>, a “magic value” that looks like a real answer;</li>
+<li><code>lookup</code> for a missing key and <code>maximum []</code> stopped the program with <code>failwith</code>.</li>
+</ul>
+<p>Each time, the notes promised a better way. Here it is. F#’s library defines a small union:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> 'a <span class="dt">option</span> =</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>    | None</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>    | Some <span class="kw">of</span> 'a</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>A value of type <code>int option</code> is <strong>either</strong> <code>None</code> (no value) <strong>or</strong> <code>Some n</code> for some <code>int</code> <code>n</code>. It is an ordinary generic union, no different from the ones we defined above:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> some3 = Some <span class="dv">3</span>                     //<span class="co"> int option</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> nothing : <span class="dt">int</span> <span class="dt">option</span> = None</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="sourceCode fsi code-with-copy"><code class="sourceCode fsharp"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>&gt; Some <span class="dv">3</span>;;</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> it: <span class="dt">int</span> <span class="dt">option</span> = Some <span class="dv">3</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>&gt; None;;</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> it: 'a <span class="dt">option</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Counting its values: <span class="math inline">|\texttt{'a option}| = |\texttt{'a}| + 1</span>. It is <code>'a</code>, plus one extra value that means “nothing”.</p>
+<section id="functions-that-might-have-no-answer" class="level2" data-number="6.1">
+<h2 data-number="6.1" class="anchored" data-anchor-id="functions-that-might-have-no-answer"><span class="header-section-number">6.1</span> Functions that might have no answer</h2>
+<p>A function that might not have an answer returns an option. By convention, its name starts with <code>try</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> headOpt xs =</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> xs <span class="kw">with</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>    | <span class="op">[]</span> -&gt; None</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>    | x :: _ -&gt; Some x</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> tryLookup key table =</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> table <span class="kw">with</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>    | <span class="op">[]</span> -&gt; None</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>    | <span class="op">(</span>k, v<span class="op">)</span> :: _ <span class="kw">when</span> k = key -&gt; Some v</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>    | _ :: rest -&gt; tryLookup key rest</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="sourceCode fsi code-with-copy"><code class="sourceCode fsharp"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> tryLookup: key: 'a -&gt; table: <span class="op">(</span>'a * 'b<span class="op">)</span> list -&gt; 'b <span class="dt">option</span> <span class="kw">when</span> 'a: equality</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The type says it honestly: <em>you might not get a <code>'b</code></em>. Hansen’s <code>findPos</code> returns the position of an element, if it is there:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> findPosFrom i x xs =</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> xs <span class="kw">with</span></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>    | <span class="op">[]</span> -&gt; None</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>    | y :: _ <span class="kw">when</span> y = x -&gt; Some i</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>    | _ :: rest -&gt; findPosFrom <span class="op">(</span>i + <span class="dv">1</span><span class="op">)</span> x rest</span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> findPos x xs = findPosFrom <span class="dv">0</span> x xs</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>findPos 4 [2 .. 6]</code> is <code>Some 2</code>; <code>findPos 7 [2 .. 6]</code> is <code>None</code>.</p>
+</section>
+<section id="using-an-option-always-both-cases" class="level2" data-number="6.2">
+<h2 data-number="6.2" class="anchored" data-anchor-id="using-an-option-always-both-cases"><span class="header-section-number">6.2</span> Using an option: always both cases</h2>
+<p>You can’t use an <code>int option</code> as an <code>int</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="sourceCode fsi code-with-copy"><code class="sourceCode fsharp"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>&gt; <span class="kw">let</span> x : <span class="dt">int</span> = Some <span class="dv">3</span>;;</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>error FS0001: This expression was expected <span class="kw">to</span> have <span class="kw">type</span></span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>    'int'</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>but here has <span class="kw">type</span></span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>    ''a option'</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>To get at the value, you have to <code>match</code>, and the <code>match</code> has to handle <code>None</code> too:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb33"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> priceText item table =</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> tryLookup item table <span class="kw">with</span></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>    | Some price -&gt; $<span class="st">"{item}: {price} baht"</span></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>    | None -&gt; $<span class="st">"{item}: not on the menu"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Forget the <code>None</code> case, and F# warns you, just as it did for a missing <code>Shape</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34"><pre class="sourceCode fsi code-with-copy"><code class="sourceCode fsharp"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>&gt; <span class="kw">let</span> get o = <span class="kw">match</span> o <span class="kw">with</span> Some x -&gt; x;;</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>warning FS0025: Incomplete pattern matches on this expression. For example, the</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>value 'None' may indicate a case <span class="kw">not</span> covered by the pattern<span class="op">(</span>s<span class="op">)</span>.</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>A very common way to handle <code>None</code> is a fallback value:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb35"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> withDefault fallback <span class="dt">option</span> =</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> <span class="dt">option</span> <span class="kw">with</span></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>    | Some x -&gt; x</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>    | None -&gt; fallback</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="the-antidote-to-null" class="level2" data-number="6.3">
+<h2 data-number="6.3" class="anchored" data-anchor-id="the-antidote-to-null"><span class="header-section-number">6.3</span> The antidote to <code>null</code></h2>
+<p>In Java, C#, JavaScript, Python, and many other languages, “no value” is usually represented by a special value such as <code>null</code>, <code>None</code>, or <code>undefined</code>, which can hide inside <strong>any</strong> variable of almost any type. A method that returns a <code>String</code> might return <code>null</code> instead, and nothing in its type tells you. Forget to check, and the program crashes at run time with a <code>NullPointerException</code> or <code>TypeError: Cannot read properties of undefined</code>, often far from where the <code>null</code> came from. Tony Hoare, who introduced null references in 1965, later called them his “billion-dollar mistake”.</p>
+<p><code>option</code> fixes this with three simple rules:</p>
+<ol type="1">
+<li><strong>Absence is visible in the type.</strong> A <code>string</code> is always a string. Only a <code>string option</code> might be missing, and you can see it in the signature.</li>
+<li><strong>You can’t forget to check.</strong> There’s no way to use an <code>int option</code> as an <code>int</code> without a <code>match</code> (or a function like <code>withDefault</code> that does one), and the <code>match</code> must handle <code>None</code>.</li>
+<li><strong>The check happens once, at the boundary.</strong> Once you have taken the <code>x</code> out of <code>Some x</code>, it is a plain value, and the rest of your code never needs to worry about it again.</li>
+</ol>
+<p>The habit to build, starting now: <strong>whenever a function might have no answer, return an <code>option</code></strong>, and never invent a magic value like <code>0</code>, <code>-1</code>, or <code>""</code>.</p>
+</section>
+<section id="options-at-the-boundaries" class="level2" data-number="6.4">
+<h2 data-number="6.4" class="anchored" data-anchor-id="options-at-the-boundaries"><span class="header-section-number">6.4</span> Options at the boundaries</h2>
+<p>The places where options appear most naturally are where data enters your program. Turning a user’s number into a <code>Month</code> can fail; after that, the month is always valid:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb36"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> monthFromNumber n =</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> n <span class="kw">with</span></span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>    | <span class="dv">1</span> -&gt; Some January | <span class="dv">2</span> -&gt; Some February | <span class="dv">3</span> -&gt; Some March</span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>    | <span class="dv">4</span> -&gt; Some April | <span class="dv">5</span> -&gt; Some May | <span class="dv">6</span> -&gt; Some June</span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>    | <span class="dv">7</span> -&gt; Some July | <span class="dv">8</span> -&gt; Some August | <span class="dv">9</span> -&gt; Some September</span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>    | <span class="dv">10</span> -&gt; Some October | <span class="dv">11</span> -&gt; Some November | <span class="dv">12</span> -&gt; Some December</span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>    | _ -&gt; None</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Options also model data that is <strong>genuinely optional</strong>, such as a middle name:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb37"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Person = <span class="op">{</span> First: <span class="dt">string</span>; Middle: <span class="dt">string</span> <span class="dt">option</span>; Last: <span class="dt">string</span> <span class="op">}</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> fullName person =</span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> person.Middle <span class="kw">with</span></span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>    | Some m -&gt; $<span class="st">"{person.First} {m} {person.Last}"</span></span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>    | None -&gt; $<span class="st">"{person.First} {person.Last}"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="the-cash-register-without-crashing" class="level2" data-number="6.5">
+<h2 data-number="6.5" class="anchored" data-anchor-id="the-cash-register-without-crashing"><span class="header-section-number">6.5</span> The cash register, without crashing</h2>
+<p>Our register’s <code>findArticle</code> stops the whole program on an unknown code. With an option, an unknown code becomes information we can act on:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb38"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> tryFindArticle code register =</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> register <span class="kw">with</span></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>    | <span class="op">[]</span> -&gt; None</span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>    | <span class="op">(</span>c, article<span class="op">)</span> :: _ <span class="kw">when</span> c = code -&gt; Some article</span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>    | _ :: rest -&gt; tryFindArticle code rest</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb39"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>//<span class="co"> Known items become lines; unknown codes are collected, not fatal.</span></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> sortItems register items =</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> items <span class="kw">with</span></span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>    | <span class="op">[]</span> -&gt; <span class="op">([]</span>, <span class="op">[])</span></span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>    | item :: rest -&gt;</span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> <span class="op">(</span>lines, unknown<span class="op">)</span> = sortItems register rest</span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a>        <span class="kw">match</span> tryFindArticle item.Code register <span class="kw">with</span></span>
+<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>        | Some article -&gt;</span>
+<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a>            <span class="kw">let</span> line =</span>
+<span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a>                <span class="op">{</span> Description = article.Name</span>
+<span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a>                  Count = item.Pieces</span>
+<span id="cb39-12"><a href="#cb39-12" aria-hidden="true" tabindex="-1"></a>                  Amount = item.Pieces * article.Price <span class="op">}</span></span>
+<span id="cb39-13"><a href="#cb39-13" aria-hidden="true" tabindex="-1"></a>            <span class="op">(</span>line :: lines, unknown<span class="op">)</span></span>
+<span id="cb39-14"><a href="#cb39-14" aria-hidden="true" tabindex="-1"></a>        | None -&gt; <span class="op">(</span>lines, item.Code :: unknown<span class="op">)</span></span>
+<span id="cb39-15"><a href="#cb39-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-16"><a href="#cb39-16" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> makeBillSafe register items =</span>
+<span id="cb39-17"><a href="#cb39-17" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> <span class="op">(</span>lines, unknown<span class="op">)</span> = sortItems register items</span>
+<span id="cb39-18"><a href="#cb39-18" aria-hidden="true" tabindex="-1"></a>    <span class="op">({</span> Lines = lines; Total = total lines <span class="op">}</span>, unknown<span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Now <code>makeBillSafe</code> bills the known items and returns the unknown codes alongside, instead of crashing halfway through a sale. The decision about what to do with unknown codes (ask the cashier, print a warning) is left to the caller, where it belongs.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>What about several steps that might each fail?
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Here each item was handled on its own. When one step <em>depends</em> on another that might fail (look up the article, <em>then</em> check the stock, <em>then</em> apply the discount), the <code>match</code>es start nesting inside each other. Week 8 shows how to chain such steps neatly, and introduces a type that can also say <em>why</em> something failed.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="recursive-unions" class="level1" data-number="7">
+<h1 data-number="7"><span class="header-section-number">7</span> Recursive unions</h1>
+<p>A union case can contain a value of the union itself. Here is a list type, defined from scratch:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb40"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> MyList&lt;'a&gt; =</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>    | Empty</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>    | Cons <span class="kw">of</span> 'a * MyList&lt;'a&gt;</span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> myLength xs =</span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> xs <span class="kw">with</span></span>
+<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a>    | Empty -&gt; <span class="dv">0</span></span>
+<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a>    | Cons <span class="op">(</span>_, rest<span class="op">)</span> -&gt; <span class="dv">1</span> + myLength rest</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb41"><pre class="sourceCode fsi code-with-copy"><code class="sourceCode fsharp"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>&gt; Cons <span class="op">(</span><span class="dv">1</span>, Cons <span class="op">(</span><span class="dv">2</span>, Empty<span class="op">))</span>;;</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> it: MyList&lt;<span class="dt">int</span>&gt; = Cons <span class="op">(</span><span class="dv">1</span>, Cons <span class="op">(</span><span class="dv">2</span>, Empty<span class="op">))</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Compare it with F#’s own list: <code>Empty</code> is <code>[]</code>, and <code>Cons (x, rest)</code> is <code>x :: rest</code>. That is essentially how F#’s <code>list</code> is defined in the library, with special syntax added for convenience. So the recipe from Week 3, one rule for <code>[]</code> and one for <code>x :: rest</code>, is simply the rule “one rule per case of the union”. In Week 6, we’ll define <strong>trees</strong> the same way, and the same recipe will work for them too.</p>
+</section>
+<section id="nested-patterns" class="level1" data-number="8">
+<h1 data-number="8"><span class="header-section-number">8</span> Nested patterns</h1>
+<p>Patterns fit inside each other, following the shape of the data. An option inside a list:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb42"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> sumKnown xs =</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> xs <span class="kw">with</span></span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>    | <span class="op">[]</span> -&gt; <span class="dv">0</span></span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>    | Some x :: rest -&gt; x + sumKnown rest</span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>    | None :: rest -&gt; sumKnown rest</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>A union case inside a list, with a guard:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb43"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> countBigCircles shapes =</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> shapes <span class="kw">with</span></span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>    | <span class="op">[]</span> -&gt; <span class="dv">0</span></span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>    | Circle r :: rest <span class="kw">when</span> r &gt; <span class="fl">1.0</span> -&gt; <span class="dv">1</span> + countBigCircles rest</span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>    | _ :: rest -&gt; countBigCircles rest</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>Circle r :: rest</code> matches a list whose first element is a circle, and binds <code>r</code> to its radius. This is what makes <code>match</code> so much more powerful than <code>if</code>: one pattern can check the shape of a value <em>and</em> take it apart, several levels deep, in a single line.</p>
+</section>
+<section id="beyond-f" class="level1" data-number="9">
+<h1 data-number="9"><span class="header-section-number">9</span> Beyond F#</h1>
+<p><strong>Records</strong> have arrived almost everywhere, usually with automatic equality by content:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Language</th>
+<th>Record-like type</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>C#</strong> (9+)</td>
+<td><code>record Article(string Name, int Price);</code> with <code>with</code>-expressions</td>
+</tr>
+<tr class="even">
+<td><strong>Java</strong> (16+)</td>
+<td><code>record Article(String name, int price) {}</code></td>
+</tr>
+<tr class="odd">
+<td><strong>Kotlin</strong></td>
+<td><code>data class Article(val name: String, val price: Int)</code> with <code>copy(...)</code></td>
+</tr>
+<tr class="even">
+<td><strong>Python</strong></td>
+<td><code>@dataclass(frozen=True)</code> classes</td>
+</tr>
+<tr class="odd">
+<td><strong>TypeScript</strong></td>
+<td>object types <code>{ name: string; price: number }</code> (compared by reference, not content)</td>
+</tr>
+<tr class="even">
+<td><strong>Rust</strong></td>
+<td><code>struct Article { name: String, price: u32 }</code> with <code>#[derive(PartialEq)]</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Unions with data</strong> are newer in mainstream languages, but spreading fast. Rust’s and Swift’s <code>enum</code>s are full unions: <code>enum Shape { Circle(f64), Rectangle(f64, f64) }</code>, with exhaustive <code>match</code>. Kotlin and Java (17+) use <strong>sealed</strong> interfaces or classes, whose subclasses are the cases; Java 21’s <code>switch</code> checks them exhaustively. TypeScript has <strong>discriminated unions</strong>, object types with a common <code>kind</code> field, <code>{ kind: "circle"; radius: number } | { kind: "rect"; w: number; h: number }</code>, narrowed by <code>switch</code>. C# has long relied on class hierarchies or libraries for this; built-in unions have been proposed for the language, so check the version you use. Python’s type hints can express unions (<code>Circle | Rectangle</code>), and <code>match</code> can take them apart, but nothing checks that every case is handled.</p>
+<p><strong>Option</strong> exists nearly everywhere too: <code>Option&lt;T&gt;</code> in Rust (which has no <code>null</code> at all), optionals <code>T?</code> in Swift and Kotlin (checked by the compiler), <code>Optional&lt;T&gt;</code> in Java, nullable reference types in C# (8+; warnings when you might use a <code>null</code>), <code>T | undefined</code> in TypeScript with <code>strictNullChecks</code>, and <code>Optional[T]</code> hints in Python. The more of the three rules above a language enforces, the fewer null crashes its programs have.</p>
+</section>
+<section id="going-further-optional" class="level1" data-number="10">
+<h1 data-number="10"><span class="header-section-number">10</span> Going further (optional)</h1>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Counting function types
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-5" class="callout-5-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Functions are values too, so we can count them. A function from <code>bool</code> to <code>Light</code> has to choose a <code>Light</code> for <code>true</code> and a <code>Light</code> for <code>false</code>: <span class="math inline">3 \times 3 = 9</span> possibilities. In general <span class="math inline">|A \to B| = |B|^{|A|}</span>, which is why mathematicians write the set of functions from <span class="math inline">A</span> to <span class="math inline">B</span> as <span class="math inline">B^A</span>. With sums, products, and powers, types really do obey the rules of high-school algebra. For instance, a function taking a pair, <code>A * B -&gt; C</code>, has <span class="math inline">|C|^{|A| \cdot |B|}</span> values, and so does its curried form <code>A -&gt; B -&gt; C</code>, with <span class="math inline">(|C|^{|B|})^{|A|}</span>. Currying (Week 2) is the type-level version of the law <span class="math inline">c^{ab} = (c^b)^a</span>.</p>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Single-case unions
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-6" class="callout-6-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>A union can have just one case: <code>type ArticleCode = ArticleCode of string</code>. Unlike the abbreviation <code>type ArticleCode = string</code>, this is a <strong>new</strong> type: you can’t pass a plain <code>string</code> where an <code>ArticleCode</code> is expected, or mix up an <code>ArticleCode</code> with a customer’s name. It costs almost nothing, and catches a whole class of mistakes. Week 9 uses this technique extensively.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="summary" class="level1" data-number="11">
+<h1 data-number="11"><span class="header-section-number">11</span> Summary</h1>
+<ul>
+<li>A <strong>type abbreviation</strong> (<code>type Price = int</code>) only gives a new name; a <strong>record</strong> or <strong>union</strong> makes a new type.</li>
+<li><strong>Records</strong> group named fields: <code>{ Name = "tea"; Price = 45 }</code>, <code>x.Name</code>, <code>{ x with Price = 50 }</code>, patterns <code>{ Name = n }</code>. Equality is by content. Annotate when field names clash.</li>
+<li><strong>Unions</strong> describe a choice of cases, each with its own data: <code>Circle of float | Rectangle of float * float</code>. Constructors build values and are patterns.</li>
+<li><code>match</code> handles each case; <strong>FS0025</strong> names any case you missed. In this course, it’s a bug.</li>
+<li><strong>Counting values</strong>: products multiply, sums add. Use counts to spot <strong>impossible states</strong>, and design types without them.</li>
+<li><strong><code>option</code></strong> (<code>None | Some of 'a</code>) is the honest answer to “there might be nothing”. Absence is in the type; you must handle <code>None</code>; after the <code>match</code>, the value is plain. Never use magic values.</li>
+<li>F#’s list is a <strong>recursive union</strong>; the list recipe is “one rule per case”.</li>
+</ul>
+</section>
+<section id="further-reading-optional" class="level1" data-number="12">
+<h1 data-number="12"><span class="header-section-number">12</span> Further reading (optional)</h1>
+<ul>
+<li>Isaac Abraham, <em>F# in Action</em>, sections 5.3–5.5 (records) and chapter 8 (patterns and unions).</li>
+<li>Scott Wlaschin, <em>Domain Modeling Made Functional</em>, chapter 4 (“Understanding Types”), on AND-types, OR-types, and composition.</li>
+<li>Scott Wlaschin, <em>F# for Fun and Profit</em>, the “Understanding F# types” series (records, discriminated unions, the option type).</li>
+<li>Microsoft’s F# language reference: <em>Records</em>, <em>Discriminated Unions</em>, and <em>Options</em>.</li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../../weeks/week03/lab.html" class="pagination-link" aria-label="Lab">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Lab</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../../weeks/week04/slides.html" class="pagination-link" aria-label="Slides">
+        <span class="nav-page-text">Slides</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

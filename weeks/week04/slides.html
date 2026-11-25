@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-html/tabby.min.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/light-border.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-b5346ae9ea15c4650d4d06850107a658.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
+  <meta name="generator" content="quarto-1.10.18">
+
+  <title>Functional Programming – Modeling Data: Records, Unions, and Option</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="../../site_libs/revealjs/dist/reset.css">
+  <link rel="stylesheet" href="../../site_libs/revealjs/dist/reveal.css">
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+      vertical-align: middle;
+    }
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      { color: #1f2933; background-color: #f5f7f9; }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #6e7b8a; font-style: italic; } /* Annotation */
+    code span.at { color: #215f9a; } /* Attribute */
+    code span.bn { color: #7a4fa0; } /* BaseN */
+    code span.bu { color: #215f9a; } /* BuiltIn */
+    code span.cf { color: #215f9a; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #9a3b12; } /* Char */
+    code span.cn { color: #7a4fa0; } /* Constant */
+    code span.co { color: #6e7b8a; font-style: italic; } /* Comment */
+    code span.cv { color: #6e7b8a; font-style: italic; } /* CommentVar */
+    code span.do { color: #6e7b8a; font-style: italic; } /* Documentation */
+    code span.dt { color: #156082; } /* DataType */
+    code span.dv { color: #7a4fa0; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { color: #215f9a; } /* Extension */
+    code span.fl { color: #7a4fa0; } /* Float */
+    code span.fu { color: #215f9a; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #215f9a; font-weight: bold; } /* Keyword */
+    code span.op { color: #1f2933; } /* Operator */
+    code span.ot { color: #1f2933; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #9a3b12; } /* SpecialChar */
+    code span.ss { color: #9a3b12; } /* SpecialString */
+    code span.st { color: #9a3b12; } /* String */
+    code span.va { color: #215f9a; } /* Variable */
+    code span.vs { color: #9a3b12; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="../../site_libs/revealjs/dist/theme/quarto-aae5c937b88c7f820468bfc5c27b40d5.css">
+  <script defer="" src="../../vendor/katex/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <link rel="stylesheet" href="../../vendor/katex/katex.min.css">
+  <link href="../../site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
+  <link href="../../site_libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
+  <link href="../../site_libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
+  <link href="../../site_libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
+  <style type="text/css">
+    .reveal div.sourceCode {
+      margin: 0;
+      overflow: auto;
+    }
+    .reveal div.hanging-indent {
+      margin-left: 1em;
+      text-indent: -1em;
+    }
+    .reveal .slide:not(.center) {
+      height: 100%;
+    }
+    .reveal .slide.scrollable {
+      overflow-y: auto;
+    }
+    .reveal .footnotes {
+      height: 100%;
+      overflow-y: auto;
+    }
+    .reveal .slide .absolute {
+      position: absolute;
+      display: block;
+    }
+    .reveal .footnotes ol {
+      counter-reset: ol;
+      list-style-type: none; 
+      margin-left: 0;
+    }
+    .reveal .footnotes ol li:before {
+      counter-increment: ol;
+      content: counter(ol) ". "; 
+    }
+    .reveal .footnotes ol li > p:first-child {
+      display: inline-block;
+    }
+    .reveal .slide ul,
+    .reveal .slide ol {
+      margin-bottom: 0.5em;
+    }
+    .reveal .slide ul li,
+    .reveal .slide ol li {
+      margin-top: 0.4em;
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide ul[role="tablist"] li {
+      margin-bottom: 0;
+    }
+    .reveal .slide ul li > *:first-child,
+    .reveal .slide ol li > *:first-child {
+      margin-block-start: 0;
+    }
+    .reveal .slide ul li > *:last-child,
+    .reveal .slide ol li > *:last-child {
+      margin-block-end: 0;
+    }
+    .reveal .slide .columns:nth-child(3) {
+      margin-block-start: 0.8em;
+    }
+    .reveal blockquote {
+      box-shadow: none;
+    }
+    .reveal .tippy-content>* {
+      margin-top: 0.2em;
+      margin-bottom: 0.7em;
+    }
+    .reveal .tippy-content>*:last-child {
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide > img.stretch.quarto-figure-center,
+    .reveal .slide > img.r-stretch.quarto-figure-center {
+      display: block;
+      margin-left: auto;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-left,
+    .reveal .slide > img.r-stretch.quarto-figure-left  {
+      display: block;
+      margin-left: 0;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-right,
+    .reveal .slide > img.r-stretch.quarto-figure-right  {
+      display: block;
+      margin-left: auto;
+      margin-right: 0; 
+    }
+  </style>
+</head>
+<body class="quarto-light">
+  <div class="reveal">
+    <div class="slides">
+
+<section id="title-slide" class="quarto-title-block center">
+  <h1 class="title">Modeling Data: Records, Unions, and Option</h1>
+  <p class="subtitle">Functional Programming · Week 4</p>
+
+<div class="quarto-title-authors">
+</div>
+
+</section>
+<section id="this-week" class="slide level2">
+<h2>This week</h2>
+<ul>
+<li>define <strong>our own types</strong>: records and unions</li>
+<li>let the compiler check <strong>every case</strong></li>
+<li><strong>count</strong> a type’s values, and spot impossible states</li>
+<li><strong><code>option</code></strong>: the honest answer to “there might be nothing”</li>
+</ul>
+<div class="fragment">
+<p>Two ways of building types, and you can describe almost any data <strong>precisely</strong>.</p>
+</div>
+</section>
+<section>
+<section id="the-cash-register-with-tuples" class="title-slide slide level1 section-break center">
+<h1>The cash register, with tuples</h1>
+
+</section>
+<section id="problem-a-cash-register" class="slide level2 drill">
+<h2>Problem: a cash register</h2>
+<p>A register knows each article’s <strong>code</strong>, <strong>name</strong>, and <strong>price</strong>.</p>
+<p>A purchase is a list of items: a <strong>number of pieces</strong> and an <strong>article code</strong>.</p>
+<p>Make the <strong>bill</strong>: for each item, pieces, name, and line total; plus the grand total.</p>
+<div class="fragment">
+<p><strong>Your turn.</strong> With lists and tuples from Week 3: what types would you use?</p>
+</div>
+</section>
+<section id="hansens-model-tuples-with-names" class="slide level2">
+<h2>Hansen’s model: tuples with names</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb1-1"><a aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ArticleCode = <span class="dt">string</span></span>
+<span id="cb1-2"><a aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ArticleName = <span class="dt">string</span></span>
+<span id="cb1-3"><a aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Price = <span class="dt">int</span></span>
+<span id="cb1-4"><a aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Register = <span class="op">(</span>ArticleCode * <span class="op">(</span>ArticleName * Price<span class="op">))</span> list</span>
+<span id="cb1-5"><a aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> NoPieces = <span class="dt">int</span></span>
+<span id="cb1-6"><a aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Item = NoPieces * ArticleCode</span>
+<span id="cb1-7"><a aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Purchase = Item list</span>
+<span id="cb1-8"><a aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Info = NoPieces * ArticleName * Price</span>
+<span id="cb1-9"><a aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Bill = Info list * Price</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="fragment">
+<p><code>type Price = int</code> is only a <strong>second name</strong> for <code>int</code>: an abbreviation, not a new type.</p>
+</div>
+</section>
+<section id="the-bill-with-tuples" class="slide level2">
+<h2>The bill, with tuples</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb2-1"><a aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> findArticle code register =</span>
+<span id="cb2-2"><a aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> register <span class="kw">with</span></span>
+<span id="cb2-3"><a aria-hidden="true" tabindex="-1"></a>    | <span class="op">[]</span> -&gt; failwith <span class="op">(</span><span class="st">"unknown article code "</span> + code<span class="op">)</span></span>
+<span id="cb2-4"><a aria-hidden="true" tabindex="-1"></a>    | <span class="op">(</span>c, article<span class="op">)</span> :: _ <span class="kw">when</span> c = code -&gt; article</span>
+<span id="cb2-5"><a aria-hidden="true" tabindex="-1"></a>    | _ :: rest -&gt; findArticle code rest</span>
+<span id="cb2-6"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> makeBill register purchase =</span>
+<span id="cb2-8"><a aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> purchase <span class="kw">with</span></span>
+<span id="cb2-9"><a aria-hidden="true" tabindex="-1"></a>    | <span class="op">[]</span> -&gt; <span class="op">([]</span>, <span class="dv">0</span><span class="op">)</span></span>
+<span id="cb2-10"><a aria-hidden="true" tabindex="-1"></a>    | <span class="op">(</span>pieces, code<span class="op">)</span> :: rest -&gt;</span>
+<span id="cb2-11"><a aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> <span class="op">(</span>name, price<span class="op">)</span> = findArticle code register</span>
+<span id="cb2-12"><a aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> lineTotal = pieces * price</span>
+<span id="cb2-13"><a aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> <span class="op">(</span>lines, total<span class="op">)</span> = makeBill register rest</span>
+<span id="cb2-14"><a aria-hidden="true" tabindex="-1"></a>        <span class="op">((</span>pieces, name, lineTotal<span class="op">)</span> :: lines, lineTotal + total<span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="which-int-is-which" class="slide level2 drill">
+<h2>Which <code>int</code> is which?</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode fsi code-with-copy"><code class="sourceCode fsharp"><span id="cb3-1"><a aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> makeBill:</span>
+<span id="cb3-2"><a aria-hidden="true" tabindex="-1"></a>  register: <span class="op">(</span><span class="dt">string</span> * <span class="op">(</span>'a * <span class="dt">int</span><span class="op">))</span> list -&gt;</span>
+<span id="cb3-3"><a aria-hidden="true" tabindex="-1"></a>    purchase: <span class="op">(</span><span class="dt">int</span> * <span class="dt">string</span><span class="op">)</span> list -&gt; <span class="op">(</span><span class="dt">int</span> * 'a * <span class="dt">int</span><span class="op">)</span> list * <span class="dt">int</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="fragment">
+<p><strong>Your turn.</strong> In <code>(int * 'a * int) list * int</code>, what does each <code>int</code> mean?</p>
+</div>
+<div class="fragment">
+<p>You can only tell by <strong>position</strong>. Swap two <code>int</code>s by mistake: it still <strong>compiles</strong>.</p>
+</div>
+<div class="fragment">
+<p>We need a way to <strong>name</strong> the parts.</p>
+</div>
+</section></section>
+<section>
+<section id="records" class="title-slide slide level1 section-break center">
+<h1>Records</h1>
+
+</section>
+<section id="a-tuple-with-named-parts" class="slide level2">
+<h2>A tuple with named parts</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb4-1"><a aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Article = <span class="op">{</span> Name: <span class="dt">string</span>; Price: <span class="dt">int</span> <span class="op">}</span></span>
+<span id="cb4-2"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> coffee = <span class="op">{</span> Name = <span class="st">"iced coffee"</span>; Price = <span class="dv">45</span> <span class="op">}</span></span>
+<span id="cb4-4"><a aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> price = coffee.Price                        //<span class="co"> 45</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="fragment">
+<ul>
+<li><code>type Article = { … }</code> defines a <strong>new type</strong></li>
+<li><code>{ Name = …; Price = … }</code> creates one; F# finds the type from the <strong>field names</strong></li>
+<li><code>coffee.Price</code> reads a field</li>
+</ul>
+</div>
+</section>
+<section id="predict-changing-a-record" class="slide level2 drill">
+<h2>Predict: “changing” a record</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb5-1"><a aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> promo = <span class="op">{</span> coffee <span class="kw">with</span> Price = <span class="dv">40</span> <span class="op">}</span>   //<span class="co"> a NEW record</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>After this, what is <code>coffee.Price</code>?</p>
+<div class="fragment">
+<p>Still <strong>45</strong>. <code>{ coffee with Price = 40 }</code> is a <strong>new</strong> record: immutable, as always.</p>
+</div>
+</section>
+<section id="patterns-and-equality" class="slide level2">
+<h2>Patterns and equality</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb6-1"><a aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> describe <span class="op">{</span> Name = name; Price = price <span class="op">}</span> =</span>
+<span id="cb6-2"><a aria-hidden="true" tabindex="-1"></a>    $<span class="st">"{name}: {price} baht"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="fragment">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb7-1"><a aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> same = coffee = <span class="op">{</span> Name = <span class="st">"iced coffee"</span>; Price = <span class="dv">45</span> <span class="op">}</span>   //<span class="co"> true</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="fragment">
+<p>Compared by <strong>content</strong>, like tuples. (Not true for ordinary objects in Java or C#.)</p>
+</div>
+</section>
+<section id="predict-two-records-same-fields" class="slide level2 drill">
+<h2>Predict: two records, same fields</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb8-1"><a aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Point = <span class="op">{</span> X: <span class="dt">float</span>; Y: <span class="dt">float</span> <span class="op">}</span></span>
+<span id="cb8-2"><a aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Vector = <span class="op">{</span> X: <span class="dt">float</span>; Y: <span class="dt">float</span> <span class="op">}</span></span>
+<span id="cb8-3"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> p = <span class="op">{</span> X = <span class="fl">1.0</span>; Y = <span class="fl">2.0</span> <span class="op">}</span>            //<span class="co"> a Vector!</span></span>
+<span id="cb8-5"><a aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> q : Point = <span class="op">{</span> X = <span class="fl">1.0</span>; Y = <span class="fl">2.0</span> <span class="op">}</span>    //<span class="co"> annotated</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>What is the type of <code>p</code>?</p>
+<div class="fragment">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode fsi code-with-copy"><code class="sourceCode fsharp"><span id="cb9-1"><a aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> p: Vector = <span class="op">{</span> X = <span class="fl">1.0</span></span>
+<span id="cb9-2"><a aria-hidden="true" tabindex="-1"></a>                  Y = <span class="fl">2.0</span> <span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The type defined <strong>last</strong> wins. When fields clash, <strong>annotate</strong>.</p>
+</div>
+</section></section>
+<section>
+<section id="the-cash-register-with-records" class="title-slide slide level1 section-break center">
+<h1>The cash register, with records</h1>
+
+</section>
+<section id="the-types" class="slide level2">
+<h2>The types</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb10-1"><a aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Article = <span class="op">{</span> Name: <span class="dt">string</span>; Price: <span class="dt">int</span> <span class="op">}</span></span>
+<span id="cb10-2"><a aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Item = <span class="op">{</span> Code: <span class="dt">string</span>; Pieces: <span class="dt">int</span> <span class="op">}</span></span>
+<span id="cb10-3"><a aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Line =</span>
+<span id="cb10-4"><a aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span> Description: <span class="dt">string</span></span>
+<span id="cb10-5"><a aria-hidden="true" tabindex="-1"></a>      Count: <span class="dt">int</span></span>
+<span id="cb10-6"><a aria-hidden="true" tabindex="-1"></a>      Amount: <span class="dt">int</span> <span class="op">}</span></span>
+<span id="cb10-7"><a aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Bill = <span class="op">{</span> Lines: Line list; Total: <span class="dt">int</span> <span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="fragment">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb11-1"><a aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> register =</span>
+<span id="cb11-2"><a aria-hidden="true" tabindex="-1"></a>    <span class="op">[</span> <span class="op">(</span><span class="st">"a1"</span>, <span class="op">{</span> Name = <span class="st">"iced coffee"</span>; Price = <span class="dv">45</span> <span class="op">})</span></span>
+<span id="cb11-3"><a aria-hidden="true" tabindex="-1"></a>      <span class="op">(</span><span class="st">"a2"</span>, <span class="op">{</span> Name = <span class="st">"sandwich"</span>; Price = <span class="dv">39</span> <span class="op">})</span></span>
+<span id="cb11-4"><a aria-hidden="true" tabindex="-1"></a>      <span class="op">(</span><span class="st">"a3"</span>, <span class="op">{</span> Name = <span class="st">"water"</span>; Price = <span class="dv">10</span> <span class="op">})</span> <span class="op">]</span></span>
+<span id="cb11-5"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-6"><a aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> purchase =</span>
+<span id="cb11-7"><a aria-hidden="true" tabindex="-1"></a>    <span class="op">[</span> <span class="op">{</span> Code = <span class="st">"a1"</span>; Pieces = <span class="dv">2</span> <span class="op">}</span></span>
+<span id="cb11-8"><a aria-hidden="true" tabindex="-1"></a>      <span class="op">{</span> Code = <span class="st">"a3"</span>; Pieces = <span class="dv">1</span> <span class="op">}</span> <span class="op">]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="one-bill-line" class="slide level2">
+<h2>One bill line</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb12-1"><a aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> findArticle code register =</span>
+<span id="cb12-2"><a aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> register <span class="kw">with</span></span>
+<span id="cb12-3"><a aria-hidden="true" tabindex="-1"></a>    | <span class="op">[]</span> -&gt; failwith <span class="op">(</span><span class="st">"unknown article code "</span> + code<span class="op">)</span></span>
+<span id="cb12-4"><a aria-hidden="true" tabindex="-1"></a>    | <span class="op">(</span>c, article<span class="op">)</span> :: _ <span class="kw">when</span> c = code -&gt; article</span>
+<span id="cb12-5"><a aria-hidden="true" tabindex="-1"></a>    | _ :: rest -&gt; findArticle code rest</span>
+<span id="cb12-6"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-7"><a aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> makeLine register <span class="op">(</span>item: Item<span class="op">)</span> =</span>
+<span id="cb12-8"><a aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> article = findArticle item.Code register</span>
+<span id="cb12-9"><a aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span> Description = article.Name</span>
+<span id="cb12-10"><a aria-hidden="true" tabindex="-1"></a>      Count = item.Pieces</span>
+<span id="cb12-11"><a aria-hidden="true" tabindex="-1"></a>      Amount = item.Pieces * article.Price <span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="fragment">
+<p><code>item.Code</code>, <code>article.Name</code>, <code>item.Pieces</code>: every value <strong>says what it is</strong>.</p>
+</div>
+</section>
+<section id="the-whole-bill" class="slide level2">
+<h2>The whole bill</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb13-1"><a aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> makeLines register items =</span>
+<span id="cb13-2"><a aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> items <span class="kw">with</span></span>
+<span id="cb13-3"><a aria-hidden="true" tabindex="-1"></a>    | <span class="op">[]</span> -&gt; <span class="op">[]</span></span>
+<span id="cb13-4"><a aria-hidden="true" tabindex="-1"></a>    | item :: rest -&gt;</span>
+<span id="cb13-5"><a aria-hidden="true" tabindex="-1"></a>        makeLine register item :: makeLines register rest</span>
+<span id="cb13-6"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-7"><a aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> total lines =</span>
+<span id="cb13-8"><a aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> lines <span class="kw">with</span></span>
+<span id="cb13-9"><a aria-hidden="true" tabindex="-1"></a>    | <span class="op">[]</span> -&gt; <span class="dv">0</span></span>
+<span id="cb13-10"><a aria-hidden="true" tabindex="-1"></a>    | line :: rest -&gt; line.Amount + total rest</span>
+<span id="cb13-11"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-12"><a aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> makeBill register items =</span>
+<span id="cb13-13"><a aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> lines = makeLines register items</span>
+<span id="cb13-14"><a aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span> Lines = lines; Total = total lines <span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="fragment">
+<p>Small functions, each easy to test on its own.</p>
+</div>
+</section>
+<section id="tuples-vs-records" class="slide level2">
+<h2>Tuples vs records</h2>
+<table class="caption-top">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>Tuples</th>
+<th>Records</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>a bill line</td>
+<td><code>(2, "iced coffee", 90)</code></td>
+<td><code>{ Description = …; Count = 2; Amount = 90 }</code></td>
+</tr>
+<tr class="even">
+<td>the bill’s type</td>
+<td><code>(int * string * int) list * int</code></td>
+<td><code>Bill</code></td>
+</tr>
+<tr class="odd">
+<td>mixing up two <code>int</code>s</td>
+<td>compiles silently</td>
+<td>a type error, or visibly wrong</td>
+</tr>
+<tr class="even">
+<td>reading a part</td>
+<td>by <strong>position</strong></td>
+<td>by <strong>name</strong></td>
+</tr>
+</tbody>
+</table>
+<div class="fragment">
+<p>Same logic, now <strong>readable</strong>, for people and for the compiler.</p>
+<p><strong>Rule of thumb:</strong> short-lived results, tuples. Anything stored or passed around, records.</p>
+</div>
+</section></section>
+<section>
+<section id="unions-one-of-several-kinds" class="title-slide slide level1 section-break center">
+<h1>Unions: one of several kinds</h1>
+
+</section>
+<section id="problem-shapes" class="slide level2 drill">
+<h2>Problem: shapes</h2>
+<p><em>A shape is either a circle, a rectangle, or a triangle.</em></p>
+<div class="fragment">
+<p><strong>Your turn.</strong> Can you model this with records and tuples? What goes wrong?</p>
+<aside class="notes">
+<p>Students usually propose a record with a “kind” string and fields for every shape. Ask: what is the radius of a rectangle?</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</div>
+</section>
+<section id="a-union-type" class="slide level2">
+<h2>A union type</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb14-1"><a aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Shape =</span>
+<span id="cb14-2"><a aria-hidden="true" tabindex="-1"></a>    | Circle <span class="kw">of</span> radius: <span class="dt">float</span></span>
+<span id="cb14-3"><a aria-hidden="true" tabindex="-1"></a>    | Rectangle <span class="kw">of</span> width: <span class="dt">float</span> * height: <span class="dt">float</span></span>
+<span id="cb14-4"><a aria-hidden="true" tabindex="-1"></a>    | Triangle <span class="kw">of</span> a: <span class="dt">float</span> * b: <span class="dt">float</span> * c: <span class="dt">float</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="fragment">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb15-1"><a aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> wheel = Circle <span class="fl">0.3</span></span>
+<span id="cb15-2"><a aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> door = Rectangle <span class="op">(</span><span class="fl">0.9</span>, <span class="fl">2.0</span><span class="op">)</span></span>
+<span id="cb15-3"><a aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> sail = Triangle <span class="op">(</span><span class="fl">3.0</span>, <span class="fl">4.0</span>, <span class="fl">5.0</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="fragment">
+<p><strong>One</strong> of the cases, each with <strong>its own</strong> data. All three are <code>Shape</code>s.</p>
+</div>
+</section>
+<section id="problem-the-area-of-a-shape" class="slide level2 drill">
+<h2>Problem: the area of a shape</h2>
+<p><code>area (Rectangle (0.9, 2.0)) = 1.8</code></p>
+<div class="fragment">
+<p><strong>Before the code:</strong> how many rules will the <code>match</code> have? What does each one bind?</p>
+</div>
+</section>
+<section id="area-one-rule-per-case" class="slide level2">
+<h2><code>area</code>: one rule per case</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb16-1"><a aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> area shape =</span>
+<span id="cb16-2"><a aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> shape <span class="kw">with</span></span>
+<span id="cb16-3"><a aria-hidden="true" tabindex="-1"></a>    | Circle r -&gt; System<span class="kw">.</span>Math<span class="kw">.</span>PI * r * r</span>
+<span id="cb16-4"><a aria-hidden="true" tabindex="-1"></a>    | Rectangle <span class="op">(</span>w, h<span class="op">)</span> -&gt; w * h</span>
+<span id="cb16-5"><a aria-hidden="true" tabindex="-1"></a>    | Triangle <span class="op">(</span>a, b, c<span class="op">)</span> -&gt;</span>
+<span id="cb16-6"><a aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> s = <span class="op">(</span>a + b + c<span class="op">)</span> / <span class="fl">2.0</span>                //<span class="co"> Heron's formula</span></span>
+<span id="cb16-7"><a aria-hidden="true" tabindex="-1"></a>        sqrt <span class="op">(</span>s * <span class="op">(</span>s - a<span class="op">)</span> * <span class="op">(</span>s - b<span class="op">)</span> * <span class="op">(</span>s - c<span class="op">))</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="fragment">
+<p>Constructors are <strong>patterns</strong>: <code>Rectangle (w, h)</code> matches only rectangles, and binds the data.</p>
+</div>
+</section>
+<section id="forget-a-case" class="slide level2">
+<h2>Forget a case</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode fsi code-with-copy"><code class="sourceCode fsharp"><span id="cb17-1"><a aria-hidden="true" tabindex="-1"></a>&gt; <span class="kw">let</span> area shape =</span>
+<span id="cb17-2"><a aria-hidden="true" tabindex="-1"></a>      <span class="kw">match</span> shape <span class="kw">with</span></span>
+<span id="cb17-3"><a aria-hidden="true" tabindex="-1"></a>      | Circle r -&gt; System<span class="kw">.</span>Math<span class="kw">.</span>PI * r * r;;</span>
+<span id="cb17-4"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-5"><a aria-hidden="true" tabindex="-1"></a>warning FS0025: Incomplete pattern matches on this expression.</span>
+<span id="cb17-6"><a aria-hidden="true" tabindex="-1"></a>For example, the value 'Rectangle <span class="op">(</span>_, _<span class="op">)</span>' may indicate a case</span>
+<span id="cb17-7"><a aria-hidden="true" tabindex="-1"></a><span class="kw">not</span> covered by the pattern<span class="op">(</span>s<span class="op">)</span>.</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="fragment">
+<p>Add <code>| Ellipse of …</code> to <code>Shape</code> next year: <strong>every</strong> <code>match</code> in the program that misses it gets a warning.</p>
+</div>
+<div class="fragment">
+<p>In this course: <strong>every FS0025 is a bug.</strong></p>
+</div>
+</section>
+<section id="predict-month-13" class="slide level2 drill">
+<h2>Predict: month 13</h2>
+<p>Week 1’s <code>daysInMonth 2025 13</code> returned <code>0</code>. Now:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb18-1"><a aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Month =</span>
+<span id="cb18-2"><a aria-hidden="true" tabindex="-1"></a>    | January | February | March | April | May | June</span>
+<span id="cb18-3"><a aria-hidden="true" tabindex="-1"></a>    | July | August | September | October | November | December</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Your turn.</strong> How do you write “month 13” now?</p>
+<div class="fragment">
+<p>You <strong>can’t</strong>. The problem isn’t handled; it’s <strong>removed</strong>.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb19-1"><a aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> isLeapYear year =</span>
+<span id="cb19-2"><a aria-hidden="true" tabindex="-1"></a>    <span class="op">(</span>year % <span class="dv">4</span> = <span class="dv">0</span> &amp;&amp; year % <span class="dv">100</span> &lt;&gt; <span class="dv">0</span><span class="op">)</span> || year % <span class="dv">400</span> = <span class="dv">0</span></span>
+<span id="cb19-3"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-4"><a aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> daysIn year month =</span>
+<span id="cb19-5"><a aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> month <span class="kw">with</span></span>
+<span id="cb19-6"><a aria-hidden="true" tabindex="-1"></a>    | February -&gt; <span class="kw">if</span> isLeapYear year <span class="kw">then</span> <span class="dv">29</span> <span class="kw">else</span> <span class="dv">28</span></span>
+<span id="cb19-7"><a aria-hidden="true" tabindex="-1"></a>    | April | June | September | November -&gt; <span class="dv">30</span></span>
+<span id="cb19-8"><a aria-hidden="true" tabindex="-1"></a>    | _ -&gt; <span class="dv">31</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="each-case-its-own-data" class="slide level2">
+<h2>Each case, its own data</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb20-1"><a aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Payment =</span>
+<span id="cb20-2"><a aria-hidden="true" tabindex="-1"></a>    | Cash <span class="kw">of</span> received: <span class="dt">int</span></span>
+<span id="cb20-3"><a aria-hidden="true" tabindex="-1"></a>    | Card <span class="kw">of</span> lastFour: <span class="dt">string</span></span>
+<span id="cb20-4"><a aria-hidden="true" tabindex="-1"></a>    | PromptPay <span class="kw">of</span> phone: <span class="dt">string</span></span>
+<span id="cb20-5"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-6"><a aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> receiptLine total payment =</span>
+<span id="cb20-7"><a aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> payment <span class="kw">with</span></span>
+<span id="cb20-8"><a aria-hidden="true" tabindex="-1"></a>    | Cash received -&gt; $<span class="st">"Cash {received}, change {received - total}"</span></span>
+<span id="cb20-9"><a aria-hidden="true" tabindex="-1"></a>    | Card lastFour -&gt; $<span class="st">"Card ending {lastFour}"</span></span>
+<span id="cb20-10"><a aria-hidden="true" tabindex="-1"></a>    | PromptPay phone -&gt; $<span class="st">"PromptPay to {phone}"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="fragment">
+<p>Compare: one record with fields for cash, card, <em>and</em> phone, most of them meaningless.</p>
+</div>
+</section></section>
+<section>
+<section id="types-as-sets" class="title-slide slide level1 section-break center">
+<h1>Types as sets</h1>
+
+</section>
+<section id="counting-values" class="slide level2">
+<h2>Counting values</h2>
+<ul>
+<li><span class="math inline">|\texttt{bool}| = 2</span>, <span class="math inline">\ |\texttt{unit}| = 1</span>, <span class="math inline">\ |\texttt{Month}| = 12</span></li>
+</ul>
+<div class="fragment">
+<p><strong>Tuples and records multiply</strong> (“AND”):</p>
+<p><span class="math display">|A \mathbin{*} B| = |A| \times |B| \qquad |\texttt{bool * Month}| = 24</span></p>
+</div>
+<div class="fragment">
+<p><strong>Unions add</strong> (“OR”):</p>
+<p><span class="math display">|\;\texttt{C1 of A | C2 of B}\;| = |A| + |B|</span></p>
+</div>
+<div class="fragment">
+<p>Products and sums: <strong>algebraic</strong> data types.</p>
+</div>
+</section>
+<section id="problem-a-traffic-light" class="slide level2 drill">
+<h2>Problem: a traffic light</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb21-1"><a aria-hidden="true" tabindex="-1"></a>//<span class="co"> red, amber, green: each lamp on or off</span></span>
+<span id="cb21-2"><a aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> LampsOn = <span class="dt">bool</span> * <span class="dt">bool</span> * <span class="dt">bool</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="fragment">
+<p><strong>Your turn.</strong> How many values does <code>LampsOn</code> have? How many are real?</p>
+</div>
+<div class="fragment">
+<p><span class="math inline">2 \times 2 \times 2 = 8</span> values; only <strong>3</strong> are real. Every function must decide what “red <em>and</em> green” means.</p>
+</div>
+</section>
+<section id="make-illegal-states-unrepresentable" class="slide level2">
+<h2>Make illegal states unrepresentable</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb22-1"><a aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Light =</span>
+<span id="cb22-2"><a aria-hidden="true" tabindex="-1"></a>    | Red</span>
+<span id="cb22-3"><a aria-hidden="true" tabindex="-1"></a>    | Amber</span>
+<span id="cb22-4"><a aria-hidden="true" tabindex="-1"></a>    | Green</span>
+<span id="cb22-5"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-6"><a aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> next light =</span>
+<span id="cb22-7"><a aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> light <span class="kw">with</span></span>
+<span id="cb22-8"><a aria-hidden="true" tabindex="-1"></a>    | Red -&gt; Green</span>
+<span id="cb22-9"><a aria-hidden="true" tabindex="-1"></a>    | Green -&gt; Amber</span>
+<span id="cb22-10"><a aria-hidden="true" tabindex="-1"></a>    | Amber -&gt; Red</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="fragment">
+<p>Exactly <strong>3</strong> values, all real. <code>next</code> has nothing to check.</p>
+</div>
+<div class="fragment">
+<p>Count the values; compare with reality. <strong>Week 9</strong> builds a whole design method on this.</p>
+</div>
+</section></section>
+<section>
+<section id="option" class="title-slide slide level1 section-break center">
+<h1>Option</h1>
+
+</section>
+<section id="problem-no-answer" class="slide level2 drill">
+<h2>Problem: no answer</h2>
+<p>What should each of these return?</p>
+<ul>
+<li><code>maximum []</code></li>
+<li><code>lookup "juice" prices</code>, when there’s no juice</li>
+<li>month number <code>13</code></li>
+</ul>
+<div class="fragment">
+<p>So far: <code>failwith</code> (crash), or a <strong>magic value</strong> like <code>0</code> or <code>-1</code>.</p>
+</div>
+<div class="fragment">
+<p><strong>Your turn.</strong> What’s wrong with the magic value?</p>
+</div>
+</section>
+<section id="option-just-a-union" class="slide level2">
+<h2><code>option</code>: just a union</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb23-1"><a aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> 'a <span class="dt">option</span> =</span>
+<span id="cb23-2"><a aria-hidden="true" tabindex="-1"></a>    | None</span>
+<span id="cb23-3"><a aria-hidden="true" tabindex="-1"></a>    | Some <span class="kw">of</span> 'a</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="fragment">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb24-1"><a aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> some3 = Some <span class="dv">3</span>                     //<span class="co"> int option</span></span>
+<span id="cb24-2"><a aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> nothing : <span class="dt">int</span> <span class="dt">option</span> = None</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="fragment">
+<p><span class="math inline">|\texttt{'a option}| = |\texttt{'a}| + 1</span>: every value, plus “nothing”.</p>
+</div>
+</section>
+<section id="functions-that-might-not-answer" class="slide level2">
+<h2>Functions that might not answer</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb25-1"><a aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> tryLookup key table =</span>
+<span id="cb25-2"><a aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> table <span class="kw">with</span></span>
+<span id="cb25-3"><a aria-hidden="true" tabindex="-1"></a>    | <span class="op">[]</span> -&gt; None</span>
+<span id="cb25-4"><a aria-hidden="true" tabindex="-1"></a>    | <span class="op">(</span>k, v<span class="op">)</span> :: _ <span class="kw">when</span> k = key -&gt; Some v</span>
+<span id="cb25-5"><a aria-hidden="true" tabindex="-1"></a>    | _ :: rest -&gt; tryLookup key rest</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode fsi code-with-copy"><code class="sourceCode fsharp"><span id="cb26-1"><a aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> tryLookup:</span>
+<span id="cb26-2"><a aria-hidden="true" tabindex="-1"></a>  key: 'a -&gt; table: <span class="op">(</span>'a * 'b<span class="op">)</span> list -&gt; 'b <span class="dt">option</span> <span class="kw">when</span> 'a: equality</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="fragment">
+<p>The type says it <strong>honestly</strong>: you <em>might</em> not get a <code>'b</code>. By convention: <strong><code>try</code></strong> in the name.</p>
+</div>
+</section>
+<section id="you-cant-forget-to-check" class="slide level2">
+<h2>You can’t forget to check</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="sourceCode fsi code-with-copy"><code class="sourceCode fsharp"><span id="cb27-1"><a aria-hidden="true" tabindex="-1"></a>&gt; <span class="kw">let</span> x : <span class="dt">int</span> = Some <span class="dv">3</span>;;</span>
+<span id="cb27-2"><a aria-hidden="true" tabindex="-1"></a>error FS0001: This expression was expected <span class="kw">to</span> have <span class="kw">type</span> 'int'</span>
+<span id="cb27-3"><a aria-hidden="true" tabindex="-1"></a>but here has <span class="kw">type</span> ''a option'</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="fragment">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb28-1"><a aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> priceText item table =</span>
+<span id="cb28-2"><a aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> tryLookup item table <span class="kw">with</span></span>
+<span id="cb28-3"><a aria-hidden="true" tabindex="-1"></a>    | Some price -&gt; $<span class="st">"{item}: {price} baht"</span></span>
+<span id="cb28-4"><a aria-hidden="true" tabindex="-1"></a>    | None -&gt; $<span class="st">"{item}: not on the menu"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="fragment">
+<p>Forget <code>None</code>, and: <code>FS0025 … the value 'None' may indicate a case not covered</code>.</p>
+</div>
+</section>
+<section id="the-antidote-to-null" class="slide level2">
+<h2>The antidote to <code>null</code></h2>
+<p><code>null</code> / <code>None</code> / <code>undefined</code> hides inside <strong>any</strong> variable. Forget to check: <code>NullPointerException</code>, <code>Cannot read properties of undefined</code>. Tony Hoare: his <strong>“billion-dollar mistake”</strong>.</p>
+<div class="fragment">
+<ol type="1">
+<li><strong>Absence is in the type.</strong> A <code>string</code> is always a string; only a <code>string option</code> might be missing.</li>
+<li><strong>You can’t forget to check.</strong> No <code>int</code> out of an <code>int option</code> without handling <code>None</code>.</li>
+<li><strong>Check once, at the boundary.</strong> After the <code>match</code>, the value is <strong>plain</strong>.</li>
+</ol>
+</div>
+<div class="fragment">
+<p><strong>The habit:</strong> might have no answer? Return an <strong><code>option</code></strong>. Never a magic value.</p>
+</div>
+</section>
+<section id="options-at-the-boundaries" class="slide level2">
+<h2>Options at the boundaries</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb29-1"><a aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> monthFromNumber n =</span>
+<span id="cb29-2"><a aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> n <span class="kw">with</span></span>
+<span id="cb29-3"><a aria-hidden="true" tabindex="-1"></a>    | <span class="dv">1</span> -&gt; Some January | <span class="dv">2</span> -&gt; Some February | <span class="dv">3</span> -&gt; Some March</span>
+<span id="cb29-4"><a aria-hidden="true" tabindex="-1"></a>    | <span class="dv">4</span> -&gt; Some April | <span class="dv">5</span> -&gt; Some May | <span class="dv">6</span> -&gt; Some June</span>
+<span id="cb29-5"><a aria-hidden="true" tabindex="-1"></a>    | <span class="dv">7</span> -&gt; Some July | <span class="dv">8</span> -&gt; Some August | <span class="dv">9</span> -&gt; Some September</span>
+<span id="cb29-6"><a aria-hidden="true" tabindex="-1"></a>    | <span class="dv">10</span> -&gt; Some October | <span class="dv">11</span> -&gt; Some November | <span class="dv">12</span> -&gt; Some December</span>
+<span id="cb29-7"><a aria-hidden="true" tabindex="-1"></a>    | _ -&gt; None</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="fragment">
+<p>A <strong>number</strong> from outside can be invalid: <code>option</code>. A <strong><code>Month</code></strong> inside your program is always valid.</p>
+</div>
+</section>
+<section id="genuinely-optional-data" class="slide level2">
+<h2>Genuinely optional data</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb30-1"><a aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Person = <span class="op">{</span> First: <span class="dt">string</span>; Middle: <span class="dt">string</span> <span class="dt">option</span>; Last: <span class="dt">string</span> <span class="op">}</span></span>
+<span id="cb30-2"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-3"><a aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> fullName person =</span>
+<span id="cb30-4"><a aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> person.Middle <span class="kw">with</span></span>
+<span id="cb30-5"><a aria-hidden="true" tabindex="-1"></a>    | Some m -&gt; $<span class="st">"{person.First} {m} {person.Last}"</span></span>
+<span id="cb30-6"><a aria-hidden="true" tabindex="-1"></a>    | None -&gt; $<span class="st">"{person.First} {person.Last}"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="the-register-without-crashing" class="slide level2">
+<h2>The register, without crashing</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb31-1"><a aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> tryFindArticle code register =</span>
+<span id="cb31-2"><a aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> register <span class="kw">with</span></span>
+<span id="cb31-3"><a aria-hidden="true" tabindex="-1"></a>    | <span class="op">[]</span> -&gt; None</span>
+<span id="cb31-4"><a aria-hidden="true" tabindex="-1"></a>    | <span class="op">(</span>c, article<span class="op">)</span> :: _ <span class="kw">when</span> c = code -&gt; Some article</span>
+<span id="cb31-5"><a aria-hidden="true" tabindex="-1"></a>    | _ :: rest -&gt; tryFindArticle code rest</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="fragment">
+<p><code>makeBillSafe</code> bills the known items and <strong>returns</strong> the unknown codes, instead of crashing mid-sale.</p>
+</div>
+<div class="fragment">
+<p>Several steps that might <strong>each</strong> fail? The <code>match</code>es nest. <strong>Week 8</strong> flattens them.</p>
+</div>
+</section></section>
+<section>
+<section id="recursive-unions" class="title-slide slide level1 section-break center">
+<h1>Recursive unions</h1>
+
+</section>
+<section id="problem-a-list-type-from-scratch" class="slide level2 drill">
+<h2>Problem: a list type from scratch</h2>
+<p>Every list is <code>[]</code>, or <code>x :: rest</code>.</p>
+<div class="fragment">
+<p><strong>Your turn.</strong> Write that as a union type.</p>
+</div>
+</section>
+<section id="mylist" class="slide level2">
+<h2><code>MyList</code></h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb32-1"><a aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> MyList&lt;'a&gt; =</span>
+<span id="cb32-2"><a aria-hidden="true" tabindex="-1"></a>    | Empty</span>
+<span id="cb32-3"><a aria-hidden="true" tabindex="-1"></a>    | Cons <span class="kw">of</span> 'a * MyList&lt;'a&gt;</span>
+<span id="cb32-4"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-5"><a aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> myLength xs =</span>
+<span id="cb32-6"><a aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> xs <span class="kw">with</span></span>
+<span id="cb32-7"><a aria-hidden="true" tabindex="-1"></a>    | Empty -&gt; <span class="dv">0</span></span>
+<span id="cb32-8"><a aria-hidden="true" tabindex="-1"></a>    | Cons <span class="op">(</span>_, rest<span class="op">)</span> -&gt; <span class="dv">1</span> + myLength rest</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="fragment">
+<p><code>Empty</code> is <code>[]</code>; <code>Cons (x, rest)</code> is <code>x :: rest</code>. That’s essentially F#’s own <code>list</code>.</p>
+</div>
+<div class="fragment">
+<p>The Week 3 recipe was always <strong>“one rule per case of the type”</strong>. Week 6: <strong>trees</strong>, the same way.</p>
+</div>
+</section>
+<section id="nested-patterns" class="slide level2">
+<h2>Nested patterns</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb33"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb33-1"><a aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> sumKnown xs =</span>
+<span id="cb33-2"><a aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> xs <span class="kw">with</span></span>
+<span id="cb33-3"><a aria-hidden="true" tabindex="-1"></a>    | <span class="op">[]</span> -&gt; <span class="dv">0</span></span>
+<span id="cb33-4"><a aria-hidden="true" tabindex="-1"></a>    | Some x :: rest -&gt; x + sumKnown rest</span>
+<span id="cb33-5"><a aria-hidden="true" tabindex="-1"></a>    | None :: rest -&gt; sumKnown rest</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="fragment">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb34-1"><a aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> countBigCircles shapes =</span>
+<span id="cb34-2"><a aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> shapes <span class="kw">with</span></span>
+<span id="cb34-3"><a aria-hidden="true" tabindex="-1"></a>    | <span class="op">[]</span> -&gt; <span class="dv">0</span></span>
+<span id="cb34-4"><a aria-hidden="true" tabindex="-1"></a>    | Circle r :: rest <span class="kw">when</span> r &gt; <span class="fl">1.0</span> -&gt; <span class="dv">1</span> + countBigCircles rest</span>
+<span id="cb34-5"><a aria-hidden="true" tabindex="-1"></a>    | _ :: rest -&gt; countBigCircles rest</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="fragment">
+<p>One pattern <strong>checks the shape</strong> and <strong>takes it apart</strong>, several levels deep.</p>
+</div>
+</section></section>
+<section>
+<section id="beyond-f" class="title-slide slide level1 section-break center">
+<h1>Beyond F#</h1>
+
+</section>
+<section id="records-unions-and-options-elsewhere" class="slide level2 smaller">
+<h2>Records, unions, and options elsewhere</h2>
+<table class="caption-top">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>Records</th>
+<th>Unions with data</th>
+<th>Option</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Rust</td>
+<td><code>struct</code></td>
+<td><code>enum</code>, exhaustive <code>match</code></td>
+<td><code>Option&lt;T&gt;</code>, no <code>null</code> at all</td>
+</tr>
+<tr class="even">
+<td>Swift</td>
+<td><code>struct</code></td>
+<td><code>enum</code> with associated values</td>
+<td><code>T?</code>, compiler-checked</td>
+</tr>
+<tr class="odd">
+<td>Kotlin</td>
+<td><code>data class</code></td>
+<td><code>sealed</code> classes, exhaustive <code>when</code></td>
+<td><code>T?</code>, compiler-checked</td>
+</tr>
+<tr class="even">
+<td>Java</td>
+<td><code>record</code> (16+)</td>
+<td><code>sealed</code> + <code>record</code>, <code>switch</code> (21)</td>
+<td><code>Optional&lt;T&gt;</code></td>
+</tr>
+<tr class="odd">
+<td>C#</td>
+<td><code>record</code> (9+)</td>
+<td>class hierarchies; built-in unions proposed</td>
+<td>nullable reference types (8+)</td>
+</tr>
+<tr class="even">
+<td>TypeScript</td>
+<td>object types</td>
+<td>discriminated unions</td>
+<td><code>T</code> | <code>undefined</code> + <code>strictNullChecks</code></td>
+</tr>
+<tr class="odd">
+<td>Python</td>
+<td><code>@dataclass(frozen=True)</code></td>
+<td><code>A</code> | <code>B</code> hints + <code>match</code>, unchecked</td>
+<td><code>Optional[T]</code> hints</td>
+</tr>
+</tbody>
+</table>
+<div class="fragment">
+<p>The more a language <strong>enforces</strong> the three rules, the fewer null crashes.</p>
+</div>
+</section>
+<section id="summary" class="slide level2">
+<h2>Summary</h2>
+<ul>
+<li><strong>Records</strong>: named fields, <code>{ x with … }</code>, compared by content; annotate on clashes</li>
+<li><strong>Unions</strong>: one of several cases, each with its own data; constructors are patterns</li>
+<li><strong>FS0025</strong> names the case you missed: <strong>every one is a bug</strong></li>
+<li><strong>Count values</strong>: products multiply, sums add. Design out <strong>impossible states</strong></li>
+<li><strong><code>option</code></strong>: absence in the type; handle <code>None</code>; never a magic value</li>
+<li>F#’s list is a <strong>recursive union</strong>; “one rule per case”</li>
+</ul>
+</section>
+<section id="this-weeks-work" class="slide level2">
+<h2>This week’s work</h2>
+<ul>
+<li><strong>Drills</strong>: predictions, counting values, designing types, <code>option</code> functions</li>
+<li><strong>Lab</strong>: <code>week04-lab.fsx</code>: cards, shapes, months, the café register; <strong>no FS0025</strong></li>
+<li><strong>Check-in</strong>: Task 11 counts and your union; the Week 1 hack, fixed</li>
+</ul>
+<div class="fragment">
+<p><strong>Next week:</strong> functions that take functions. Each of Week 3’s shapes becomes <strong>one</strong> function.</p>
+
+
+</div>
+</section></section>
+    </div>
+  <div class="quarto-auto-generated-content" style="display: none;">
+<div class="footer footer-default">
+<p>Functional Programming · Week 4 · Records, Unions, and Option</p>
+</div>
+</div></div>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script>
+  <script src="../../site_libs/revealjs/dist/reveal.js"></script>
+  <!-- reveal.js plugins -->
+  <script src="../../site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
+  <script src="../../site_libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
+  <script src="../../site_libs/revealjs/plugin/reveal-menu/menu.js"></script>
+  <script src="../../site_libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
+  <script src="../../site_libs/revealjs/plugin/quarto-support/support.js"></script>
+  
+
+  <script src="../../site_libs/revealjs/plugin/notes/notes.js"></script>
+  <script src="../../site_libs/revealjs/plugin/search/search.js"></script>
+  <script src="../../site_libs/revealjs/plugin/zoom/zoom.js"></script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://revealjs.com/config/
+      Reveal.initialize({
+'controlsAuto': true,
+'previewLinksAuto': false,
+'pdfSeparateFragments': false,
+'autoAnimateEasing': "ease",
+'autoAnimateDuration': 1,
+'autoAnimateUnmatched': true,
+'jumpToSlide': true,
+'menu': {"side":"left","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.togglePdfExport(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleScrollView(event)\"><kbd>r</kbd> Scroll View Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"5\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"}],"openButton":true},
+'smaller': false,
+ 
+        // Display controls in the bottom right corner
+        controls: false,
+
+        // Help the user learn the controls by providing hints, for example by
+        // bouncing the down arrow when they first encounter a vertical slide
+        controlsTutorial: false,
+
+        // Determines where controls appear, "edges" or "bottom-right"
+        controlsLayout: 'edges',
+
+        // Visibility rule for backwards navigation arrows; "faded", "hidden"
+        // or "visible"
+        controlsBackArrows: 'faded',
+
+        // Display a presentation progress bar
+        progress: true,
+
+        // Display the page number of the current slide
+        slideNumber: 'c/t',
+
+        // 'all', 'print', or 'speaker'
+        showSlideNumber: 'all',
+
+        // Add the current slide number to the URL hash so that reloading the
+        // page/copying the URL will return you to the same slide
+        hash: true,
+
+        // Start with 1 for the hash rather than 0
+        hashOneBasedIndex: false,
+
+        // Flags if we should monitor the hash and change slides accordingly
+        respondToHashChanges: true,
+
+        // Push each slide change to the browser history
+        history: true,
+
+        // Enable keyboard shortcuts for navigation
+        keyboard: true,
+
+        // Enable the slide overview mode
+        overview: true,
+
+        // Disables the default reveal.js slide layout (scaling and centering)
+        // so that you can use custom CSS layout
+        disableLayout: false,
+
+        // Vertical centering of slides
+        center: false,
+
+        // Enables touch navigation on devices with touch input
+        touch: true,
+
+        // Loop the presentation
+        loop: false,
+
+        // Change the presentation direction to be RTL
+        rtl: false,
+
+        // see https://revealjs.com/vertical-slides/#navigation-mode
+        navigationMode: 'linear',
+
+        // Randomizes the order of slides each time the presentation loads
+        shuffle: false,
+
+        // Turns fragments on and off globally
+        fragments: true,
+
+        // Flags whether to include the current fragment in the URL,
+        // so that reloading brings you to the same fragment position
+        fragmentInURL: false,
+
+        // Flags if the presentation is running in an embedded mode,
+        // i.e. contained within a limited portion of the screen
+        embedded: false,
+
+        // Flags if we should show a help overlay when the questionmark
+        // key is pressed
+        help: true,
+
+        // Flags if it should be possible to pause the presentation (blackout)
+        pause: true,
+
+        // Flags if speaker notes should be visible to all viewers
+        showNotes: false,
+
+        // Global override for autoplaying embedded media (null/true/false)
+        autoPlayMedia: null,
+
+        // Global override for preloading lazy-loaded iframes (null/true/false)
+        preloadIframes: null,
+
+        // Number of milliseconds between automatically proceeding to the
+        // next slide, disabled when set to 0, this value can be overwritten
+        // by using a data-autoslide attribute on your slides
+        autoSlide: 0,
+
+        // Stop auto-sliding after user input
+        autoSlideStoppable: true,
+
+        // Use this method for navigation when auto-sliding
+        autoSlideMethod: null,
+
+        // Specify the average time in seconds that you think you will spend
+        // presenting each slide. This is used to show a pacing timer in the
+        // speaker view
+        defaultTiming: null,
+
+        // Enable slide navigation via mouse wheel
+        mouseWheel: false,
+
+        // The display mode that will be used to show slides
+        display: 'block',
+
+        // Hide cursor if inactive
+        hideInactiveCursor: true,
+
+        // Time before the cursor is hidden (in ms)
+        hideCursorTime: 5000,
+
+        // Opens links in an iframe preview overlay
+        previewLinks: false,
+
+        // Transition style (none/fade/slide/convex/concave/zoom)
+        transition: 'none',
+
+        // Transition speed (default/fast/slow)
+        transitionSpeed: 'default',
+
+        // Transition style for full page slide backgrounds
+        // (none/fade/slide/convex/concave/zoom)
+        backgroundTransition: 'none',
+
+        // Number of slides away from the current that are visible
+        viewDistance: 3,
+
+        // Number of slides away from the current that are visible on mobile
+        // devices. It is advisable to set this to a lower number than
+        // viewDistance in order to save resources.
+        mobileViewDistance: 2,
+
+        // The "normal" size of the presentation, aspect ratio will be preserved
+        // when the presentation is scaled to fit different resolutions. Can be
+        // specified using percentage units.
+        width: 1280,
+
+        height: 800,
+
+        // Factor of the display size that should remain empty around the content
+        margin: 6.0e-2,
+
+        // reveal.js plugins
+        plugins: [QuartoLineHighlight, PdfExport, RevealMenu, QuartoSupport,
+
+          RevealNotes,
+          RevealSearch,
+          RevealZoom
+        ]
+      });
+    </script>
+    <script id="quarto-html-after-body" type="application/javascript">
+      window.document.addEventListener("DOMContentLoaded", function (event) {
+        const tabsets =  window.document.querySelectorAll(".panel-tabset-tabby")
+        tabsets.forEach(function(tabset) {
+          const tabby = new Tabby('#' + tabset.id);
+        });
+        const isCodeAnnotation = (el) => {
+          for (const clz of el.classList) {
+            if (clz.startsWith('code-annotation-')) {                     
+              return true;
+            }
+          }
+          return false;
+        }
+        const onCopySuccess = function(e) {
+          // button target
+          const button = e.trigger;
+          // don't keep focus
+          button.blur();
+          // flash "checked"
+          button.classList.add('code-copy-button-checked');
+          var currentTitle = button.getAttribute("title");
+          button.setAttribute("title", "Copied!");
+          let tooltip;
+          if (window.bootstrap) {
+            button.setAttribute("data-bs-toggle", "tooltip");
+            button.setAttribute("data-bs-placement", "left");
+            button.setAttribute("data-bs-title", "Copied!");
+            tooltip = new bootstrap.Tooltip(button, 
+              { trigger: "manual", 
+                customClass: "code-copy-button-tooltip",
+                offset: [0, -8]});
+            tooltip.show();    
+          }
+          setTimeout(function() {
+            if (tooltip) {
+              tooltip.hide();
+              button.removeAttribute("data-bs-title");
+              button.removeAttribute("data-bs-toggle");
+              button.removeAttribute("data-bs-placement");
+            }
+            button.setAttribute("title", currentTitle);
+            button.classList.remove('code-copy-button-checked');
+          }, 1000);
+          // clear code selection
+          e.clearSelection();
+        }
+        const getTextToCopy = function(trigger) {
+          const outerScaffold = trigger.parentElement.cloneNode(true);
+          const codeEl = outerScaffold.querySelector('code');
+          for (const childEl of codeEl.children) {
+            if (isCodeAnnotation(childEl)) {
+              childEl.remove();
+            }
+          }
+          return codeEl.innerText;
+        }
+        const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+          text: getTextToCopy
+        });
+        clipboard.on('success', onCopySuccess);
+        if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+          const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+            text: getTextToCopy,
+            container: window.document.getElementById('quarto-embedded-source-code-modal')
+          });
+          clipboardModal.on('success', onCopySuccess);
+        }
+          var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+          var mailtoRegex = new RegExp(/^mailto:/);
+            var filterRegex = new RegExp('/' + window.location.host + '/');
+          var isInternal = (href) => {
+              return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+          }
+          // Inspect non-navigation links and adorn them if external
+         var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+          for (var i=0; i<links.length; i++) {
+            const link = links[i];
+            if (!isInternal(link.href)) {
+              // undo the damage that might have been done by quarto-nav.js in the case of
+              // links that we want to consider external
+              if (link.dataset.originalHref !== undefined) {
+                link.href = link.dataset.originalHref;
+              }
+            }
+          }
+        function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+          const config = {
+            allowHTML: true,
+            maxWidth: 500,
+            delay: 100,
+            arrow: false,
+            appendTo: function(el) {
+                return el.closest('section.slide') || el.parentElement;
+            },
+            interactive: true,
+            interactiveBorder: 10,
+            theme: 'light-border',
+            placement: 'bottom-start',
+          };
+          if (contentFn) {
+            config.content = contentFn;
+          }
+          if (onTriggerFn) {
+            config.onTrigger = onTriggerFn;
+          }
+          if (onUntriggerFn) {
+            config.onUntrigger = onUntriggerFn;
+          }
+            config['offset'] = [0,0];
+            config['maxWidth'] = 700;
+          window.tippy(el, config); 
+        }
+        const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+        for (var i=0; i<noterefs.length; i++) {
+          const ref = noterefs[i];
+          tippyHover(ref, function() {
+            // use id or data attribute instead here
+            let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+            try { href = new URL(href).hash; } catch {}
+            const id = href.replace(/^#\/?/, "");
+            const note = window.document.getElementById(id);
+            if (note) {
+              return note.innerHTML;
+            } else {
+              return "";
+            }
+          });
+        }
+        const findCites = (el) => {
+          const parentEl = el.parentElement;
+          if (parentEl) {
+            const cites = parentEl.dataset.cites;
+            if (cites) {
+              return {
+                el,
+                cites: cites.split(' ')
+              };
+            } else {
+              return findCites(el.parentElement)
+            }
+          } else {
+            return undefined;
+          }
+        };
+        var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+        for (var i=0; i<bibliorefs.length; i++) {
+          const ref = bibliorefs[i];
+          const citeInfo = findCites(ref);
+          if (citeInfo) {
+            tippyHover(citeInfo.el, function() {
+              var popup = window.document.createElement('div');
+              citeInfo.cites.forEach(function(cite) {
+                var citeDiv = window.document.createElement('div');
+                citeDiv.classList.add('hanging-indent');
+                citeDiv.classList.add('csl-entry');
+                var biblioDiv = window.document.getElementById('ref-' + cite);
+                if (biblioDiv) {
+                  citeDiv.innerHTML = biblioDiv.innerHTML;
+                }
+                popup.appendChild(citeDiv);
+              });
+              return popup.innerHTML;
+            });
+          }
+        }
+      });
+      </script>
+    
+
+</body></html>

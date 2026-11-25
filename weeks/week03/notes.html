@@ -1,0 +1,1702 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Week 3 · Lists, Tuples, and Recursion Patterns – Functional Programming</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../weeks/week03/slides.html" rel="next">
+<link href="../../weeks/week02/lab.html" rel="prev">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-11cd2b351f627a0e63fc448ff4a87ab1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-bc7666a66758628ea7247e883a9a1c09.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script defer="" src="../../vendor/katex/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <link rel="stylesheet" href="../../vendor/katex/katex.min.css">
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar docked quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../weeks/week03/notes.html">Week 3 · Lists, Tuples, and Patterns</a></li><li class="breadcrumb-item"><a href="../../weeks/week03/notes.html">Notes</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../../">Functional Programming</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Course home</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Week 1 · Programs as Expressions</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week01/notes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notes</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week01/slides.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Slides</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week01/drills.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Drills</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week01/lab.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lab</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Week 2 · Functions, Recursion, and Types</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week02/notes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notes</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week02/slides.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Slides</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week02/drills.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Drills</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week02/lab.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lab</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Week 3 · Lists, Tuples, and Patterns</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week03/notes.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Notes</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week03/slides.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Slides</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week03/drills.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Drills</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week03/lab.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lab</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Week 4 · Records, Unions, and Option</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week04/notes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notes</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week04/slides.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Slides</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week04/drills.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Drills</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../weeks/week04/lab.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lab</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul class="collapse">
+  <li><a href="#two-ways-to-group-values" id="toc-two-ways-to-group-values" class="nav-link active" data-scroll-target="#two-ways-to-group-values"><span class="header-section-number">1</span> Two ways to group values</a>
+  <ul class="collapse">
+  <li><a href="#coming-from-python" id="toc-coming-from-python" class="nav-link" data-scroll-target="#coming-from-python"><span class="header-section-number">1.1</span> Coming from Python</a></li>
+  </ul></li>
+  <li><a href="#tuples" id="toc-tuples" class="nav-link" data-scroll-target="#tuples"><span class="header-section-number">2</span> Tuples</a>
+  <ul class="collapse">
+  <li><a href="#building-tuples" id="toc-building-tuples" class="nav-link" data-scroll-target="#building-tuples"><span class="header-section-number">2.1</span> Building tuples</a></li>
+  <li><a href="#taking-tuples-apart" id="toc-taking-tuples-apart" class="nav-link" data-scroll-target="#taking-tuples-apart"><span class="header-section-number">2.2</span> Taking tuples apart</a></li>
+  <li><a href="#returning-several-results" id="toc-returning-several-results" class="nav-link" data-scroll-target="#returning-several-results"><span class="header-section-number">2.3</span> Returning several results</a></li>
+  <li><a href="#tuples-as-parameters" id="toc-tuples-as-parameters" class="nav-link" data-scroll-target="#tuples-as-parameters"><span class="header-section-number">2.4</span> Tuples as parameters</a></li>
+  <li><a href="#net-method-calls-look-like-tuples" id="toc-net-method-calls-look-like-tuples" class="nav-link" data-scroll-target="#net-method-calls-look-like-tuples"><span class="header-section-number">2.5</span> .NET method calls look like tuples</a></li>
+  <li><a href="#comparing-tuples" id="toc-comparing-tuples" class="nav-link" data-scroll-target="#comparing-tuples"><span class="header-section-number">2.6</span> Comparing tuples</a></li>
+  </ul></li>
+  <li><a href="#lists" id="toc-lists" class="nav-link" data-scroll-target="#lists"><span class="header-section-number">3</span> Lists</a>
+  <ul class="collapse">
+  <li><a href="#building-lists" id="toc-building-lists" class="nav-link" data-scroll-target="#building-lists"><span class="header-section-number">3.1</span> Building lists</a></li>
+  <li><a href="#what-a-list-really-is" id="toc-what-a-list-really-is" class="nav-link" data-scroll-target="#what-a-list-really-is"><span class="header-section-number">3.2</span> What a list really is</a></li>
+  </ul></li>
+  <li><a href="#taking-lists-apart-with-match" id="toc-taking-lists-apart-with-match" class="nav-link" data-scroll-target="#taking-lists-apart-with-match"><span class="header-section-number">4</span> Taking lists apart with <code>match</code></a>
+  <ul class="collapse">
+  <li><a href="#matching-on-several-values-at-once" id="toc-matching-on-several-values-at-once" class="nav-link" data-scroll-target="#matching-on-several-values-at-once"><span class="header-section-number">4.1</span> Matching on several values at once</a></li>
+  </ul></li>
+  <li><a href="#the-recipe-for-lists" id="toc-the-recipe-for-lists" class="nav-link" data-scroll-target="#the-recipe-for-lists"><span class="header-section-number">5</span> The recipe, for lists</a>
+  <ul class="collapse">
+  <li><a href="#length" id="toc-length" class="nav-link" data-scroll-target="#length"><span class="header-section-number">5.1</span> <code>length</code></a></li>
+  <li><a href="#a-full-trace-sum" id="toc-a-full-trace-sum" class="nav-link" data-scroll-target="#a-full-trace-sum"><span class="header-section-number">5.2</span> A full trace: <code>sum</code></a></li>
+  <li><a href="#joining-lists-append" id="toc-joining-lists-append" class="nav-link" data-scroll-target="#joining-lists-append"><span class="header-section-number">5.3</span> Joining lists: <code>append</code></a></li>
+  <li><a href="#membership-and-the-equality-constraint" id="toc-membership-and-the-equality-constraint" class="nav-link" data-scroll-target="#membership-and-the-equality-constraint"><span class="header-section-number">5.4</span> Membership, and the <code>equality</code> constraint</a></li>
+  <li><a href="#same-recipe-different-steps" id="toc-same-recipe-different-steps" class="nav-link" data-scroll-target="#same-recipe-different-steps"><span class="header-section-number">5.5</span> Same recipe, different steps</a></li>
+  </ul></li>
+  <li><a href="#recursion-shapes" id="toc-recursion-shapes" class="nav-link" data-scroll-target="#recursion-shapes"><span class="header-section-number">6</span> Recursion shapes</a>
+  <ul class="collapse">
+  <li><a href="#transform-each-element" id="toc-transform-each-element" class="nav-link" data-scroll-target="#transform-each-element"><span class="header-section-number">6.1</span> Transform each element</a></li>
+  <li><a href="#keep-some-elements" id="toc-keep-some-elements" class="nav-link" data-scroll-target="#keep-some-elements"><span class="header-section-number">6.2</span> Keep some elements</a></li>
+  <li><a href="#combine-all-elements-into-one-value" id="toc-combine-all-elements-into-one-value" class="nav-link" data-scroll-target="#combine-all-elements-into-one-value"><span class="header-section-number">6.3</span> Combine all elements into one value</a></li>
+  <li><a href="#stop-early" id="toc-stop-early" class="nav-link" data-scroll-target="#stop-early"><span class="header-section-number">6.4</span> Stop early</a></li>
+  <li><a href="#each-element-to-many" id="toc-each-element-to-many" class="nav-link" data-scroll-target="#each-element-to-many"><span class="header-section-number">6.5</span> Each element to many</a></li>
+  <li><a href="#why-the-shapes-matter" id="toc-why-the-shapes-matter" class="nav-link" data-scroll-target="#why-the-shapes-matter"><span class="header-section-number">6.6</span> Why the shapes matter</a></li>
+  </ul></li>
+  <li><a href="#lists-and-tuples-together" id="toc-lists-and-tuples-together" class="nav-link" data-scroll-target="#lists-and-tuples-together"><span class="header-section-number">7</span> Lists and tuples together</a>
+  <ul class="collapse">
+  <li><a href="#pairing-up-zip-and-unzip" id="toc-pairing-up-zip-and-unzip" class="nav-link" data-scroll-target="#pairing-up-zip-and-unzip"><span class="header-section-number">7.1</span> Pairing up: <code>zip</code> and <code>unzip</code></a></li>
+  <li><a href="#returning-two-results-from-one-pass" id="toc-returning-two-results-from-one-pass" class="nav-link" data-scroll-target="#returning-two-results-from-one-pass"><span class="header-section-number">7.2</span> Returning two results from one pass</a></li>
+  <li><a href="#looking-things-up" id="toc-looking-things-up" class="nav-link" data-scroll-target="#looking-things-up"><span class="header-section-number">7.3</span> Looking things up</a></li>
+  </ul></li>
+  <li><a href="#what-things-cost" id="toc-what-things-cost" class="nav-link" data-scroll-target="#what-things-cost"><span class="header-section-number">8</span> What things cost</a></li>
+  <li><a href="#two-lists-at-once-merge" id="toc-two-lists-at-once-merge" class="nav-link" data-scroll-target="#two-lists-at-once-merge"><span class="header-section-number">9</span> Two lists at once: <code>merge</code></a></li>
+  <li><a href="#text-as-a-list-of-characters" id="toc-text-as-a-list-of-characters" class="nav-link" data-scroll-target="#text-as-a-list-of-characters"><span class="header-section-number">10</span> Text as a list of characters</a></li>
+  <li><a href="#beyond-f" id="toc-beyond-f" class="nav-link" data-scroll-target="#beyond-f"><span class="header-section-number">11</span> Beyond F#</a></li>
+  <li><a href="#going-further-optional" id="toc-going-further-optional" class="nav-link" data-scroll-target="#going-further-optional"><span class="header-section-number">12</span> Going further (optional)</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="header-section-number">13</span> Summary</a></li>
+  <li><a href="#further-reading-optional" id="toc-further-reading-optional" class="nav-link" data-scroll-target="#further-reading-optional"><span class="header-section-number">14</span> Further reading (optional)</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../weeks/week03/notes.html">Week 3 · Lists, Tuples, and Patterns</a></li><li class="breadcrumb-item"><a href="../../weeks/week03/notes.html">Notes</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Week 3 · Lists, Tuples, and Recursion Patterns</h1>
+<p class="subtitle lead">Lecture notes</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="callout callout-style-simple callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>After this week you should be able to
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li>tell a <strong>list</strong> from a <strong>tuple</strong>, in code and in types, and avoid the <code>[1, 2]</code> trap;</li>
+<li>build tuples and take them apart with patterns;</li>
+<li>build lists with <code>[…]</code>, ranges, and <code>::</code>, and take them apart with list patterns;</li>
+<li>write recursive functions on lists with the recipe, and trace them;</li>
+<li>recognise five common <strong>shapes</strong> of list recursion, and write new functions of each shape;</li>
+<li>combine lists and tuples: <code>zip</code>, <code>unzip</code>, lists of pairs, returning two results;</li>
+<li>explain why some list operations are cheap and others are expensive.</li>
+</ul>
+</div>
+</div>
+<p>Week 2’s recursion worked on numbers. This week it works on <strong>lists</strong>, the data structure that recursion fits most naturally. As in Week 2, the goal is fluency, so there are many small examples. Most of them fall into a handful of <strong>shapes</strong>, and learning to see the shapes is the most useful thing you can take from this week.</p>
+<section id="two-ways-to-group-values" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Two ways to group values</h1>
+<p>F# has two basic ways to put several values together:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> scores = <span class="op">[</span><span class="dv">72</span>; <span class="dv">85</span>; <span class="dv">90</span><span class="op">]</span>          //<span class="co"> a list:  ; between elements</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> student = <span class="op">(</span><span class="st">"Ploy"</span>, <span class="dv">87</span><span class="op">)</span>         //<span class="co"> a tuple: , between components</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>List</strong></th>
+<th><strong>Tuple</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Written</td>
+<td><code>[72; 85; 90]</code></td>
+<td><code>("Ploy", 87)</code></td>
+</tr>
+<tr class="even">
+<td>Separator</td>
+<td><strong>semicolon</strong> <code>;</code></td>
+<td><strong>comma</strong> <code>,</code></td>
+</tr>
+<tr class="odd">
+<td>Elements</td>
+<td>all of the <strong>same type</strong></td>
+<td>may have <strong>different types</strong></td>
+</tr>
+<tr class="even">
+<td>Size</td>
+<td>any length; can grow and shrink</td>
+<td><strong>fixed</strong>: the size is part of the type</td>
+</tr>
+<tr class="odd">
+<td>Type</td>
+<td><code>int list</code></td>
+<td><code>string * int</code></td>
+</tr>
+<tr class="even">
+<td>Typical use</td>
+<td>“many of the same thing”: scores, words, orders</td>
+<td>“one thing made of parts”: a name <em>and</em> a score, <em>x and y</em></td>
+</tr>
+</tbody>
+</table>
+<section id="coming-from-python" class="level2" data-number="1.1">
+<h2 data-number="1.1" class="anchored" data-anchor-id="coming-from-python"><span class="header-section-number">1.1</span> Coming from Python</h2>
+<p>In Python you write both with commas: <code>[72, 85, 90]</code> is a list and <code>("Ploy", 87)</code> is a tuple. In F#, the <strong>comma always makes a tuple</strong>, and lists use <strong>semicolons</strong>. So a Python habit produces something unexpected, with no error and no warning:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> intended = <span class="op">[</span><span class="dv">1</span>; <span class="dv">2</span><span class="op">]</span>              //<span class="co"> int list: two elements</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> surprise = <span class="op">[</span><span class="dv">1</span>, <span class="dv">2</span><span class="op">]</span>              //<span class="co"> (int * int) list: ONE element, the pair (1, 2)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode fsi code-with-copy"><code class="sourceCode fsharp"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>&gt; <span class="op">[</span><span class="dv">1</span>; <span class="dv">2</span><span class="op">]</span>;;</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> it: <span class="dt">int</span> list = <span class="op">[</span><span class="dv">1</span>; <span class="dv">2</span><span class="op">]</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>&gt; <span class="op">[</span><span class="dv">1</span>, <span class="dv">2</span><span class="op">]</span>;;</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> it: <span class="op">(</span><span class="dt">int</span> * <span class="dt">int</span><span class="op">)</span> list = <span class="op">[(</span><span class="dv">1</span>, <span class="dv">2</span><span class="op">)]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>[1, 2]</code> is a list with <strong>one</strong> element, and that element is the pair <code>(1, 2)</code>. Always read the type FSI reports: <code>int list</code> and <code>(int * int) list</code> are very different things.</p>
+<p>Both separators appear together when you have a list <em>of</em> tuples, which is very common:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> prices = <span class="op">[(</span><span class="st">"coffee"</span>, <span class="dv">55</span><span class="op">)</span>; <span class="op">(</span><span class="st">"tea"</span>, <span class="dv">45</span><span class="op">)</span>; <span class="op">(</span><span class="st">"cake"</span>, <span class="dv">80</span><span class="op">)]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Here <code>prices</code> has type <code>(string * int) list</code>: commas inside each pair, semicolons between the pairs.</p>
+<p>One Python intuition does carry over: in both languages it is the <strong>comma</strong>, not the parentheses, that makes a tuple. In Python <code>p = 1, 2</code> is a tuple; in F# <code>let p = 1, 2</code> is too. We usually add parentheses anyway, for readability.</p>
+</section>
+</section>
+<section id="tuples" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Tuples</h1>
+<section id="building-tuples" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="building-tuples"><span class="header-section-number">2.1</span> Building tuples</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> point = <span class="op">(</span><span class="fl">3.0</span>, <span class="fl">4.0</span><span class="op">)</span>               //<span class="co"> float * float</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> record = <span class="op">(</span><span class="st">"Nattapong"</span>, <span class="dv">21</span>, <span class="kw">true</span><span class="op">)</span> //<span class="co"> string * int * bool</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> noParens = <span class="dv">1</span>, <span class="dv">2</span>                  //<span class="co"> the comma does it</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The type of a tuple lists the types of its parts, separated by <code>*</code>: <code>point</code> has type <code>float * float</code>, and <code>record</code> has type <code>string * int * bool</code>. The <code>*</code> is a hint about what a tuple is: a combination of one value from each type, like the Cartesian product <span class="math inline">A \times B</span> in math. Week 4 makes that idea precise.</p>
+<p>The size of a tuple is part of its type. A pair and a triple are different types, and F# checks this:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode fsi code-with-copy"><code class="sourceCode fsharp"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>&gt; <span class="kw">let</span> <span class="op">(</span>a, b, c<span class="op">)</span> = <span class="op">(</span><span class="dv">1</span>, <span class="dv">2</span><span class="op">)</span>;;</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>error FS0001: Type mismatch. Expecting a tuple <span class="kw">of</span> length <span class="dv">3</span> <span class="kw">of</span> <span class="kw">type</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    'a * 'b * 'c</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>but given a tuple <span class="kw">of</span> length <span class="dv">2</span> <span class="kw">of</span> <span class="kw">type</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> * <span class="dt">int</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="taking-tuples-apart" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="taking-tuples-apart"><span class="header-section-number">2.2</span> Taking tuples apart</h2>
+<p>In Python you can write <code>t[0]</code>. In F# you take a tuple apart with a <strong>pattern</strong>, naming each part:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="op">(</span>name, age, enrolled<span class="op">)</span> = record   //<span class="co"> by pattern</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> x0 = fst point                   //<span class="co"> pairs only</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> y0 = snd point</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>fst</code> and <code>snd</code> give the first and second component, but only of a <strong>pair</strong>. <code>fst (1, 2, 3)</code> is a type error. For anything bigger, use a pattern.</p>
+</section>
+<section id="returning-several-results" class="level2" data-number="2.3">
+<h2 data-number="2.3" class="anchored" data-anchor-id="returning-several-results"><span class="header-section-number">2.3</span> Returning several results</h2>
+<p>A tuple is the simplest way for a function to return more than one value:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> divMod a b = <span class="op">(</span>a / b, a % b<span class="op">)</span>   //<span class="co"> two results</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="op">(</span>q, r<span class="op">)</span> = divMod <span class="dv">17</span> <span class="dv">5</span>          //<span class="co"> q = 3, r = 2</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="tuples-as-parameters" class="level2" data-number="2.4">
+<h2 data-number="2.4" class="anchored" data-anchor-id="tuples-as-parameters"><span class="header-section-number">2.4</span> Tuples as parameters</h2>
+<p>A function can take a tuple as a parameter, and take it apart right in the parameter list:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> distance <span class="op">(</span>x1, y1<span class="op">)</span> <span class="op">(</span>x2, y2<span class="op">)</span> =</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    sqrt <span class="op">((</span>x2 - x1<span class="op">)</span> ** <span class="fl">2.0</span> + <span class="op">(</span>y2 - y1<span class="op">)</span> ** <span class="fl">2.0</span><span class="op">)</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> d = distance <span class="op">(</span><span class="fl">0.0</span>, <span class="fl">0.0</span><span class="op">)</span> <span class="op">(</span><span class="fl">3.0</span>, <span class="fl">4.0</span><span class="op">)</span>   //<span class="co"> 5.0</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode fsi code-with-copy"><code class="sourceCode fsharp"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> distance: x1: <span class="dt">float</span> * y1: <span class="dt">float</span> -&gt; x2: <span class="dt">float</span> * y2: <span class="dt">float</span> -&gt; <span class="dt">float</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Read the type carefully: <code>distance</code> takes <strong>two</strong> arguments, and each one is a pair of <code>float</code>s.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Didn’t Week 1 say not to write <code>f(a, b)</code>?
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>It did, and both statements are true. The question is what the function <em>means</em>. <code>totalCost</code> from Week 1 takes a price and a quantity: two separate things, so they are two curried parameters, <code>totalCost 19.5 4</code>. <code>distance</code> takes two <em>points</em>, and a point really is one thing made of two parts, so each point is one tuple. Use a tuple when the parts belong together; use separate parameters when they don’t. Separate parameters are also the ones you can partially apply.</p>
+</div>
+</div>
+</section>
+<section id="net-method-calls-look-like-tuples" class="level2" data-number="2.5">
+<h2 data-number="2.5" class="anchored" data-anchor-id="net-method-calls-look-like-tuples"><span class="header-section-number">2.5</span> .NET method calls look like tuples</h2>
+<p>You have already been calling <strong>methods</strong>: <code>s.ToUpper()</code>, <code>w.Length</code>, <code>System.String.Concat …</code>. F# runs on .NET, whose standard library is written mostly in C#, and C#-style methods are called with their arguments in parentheses, separated by commas:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> larger = System<span class="kw">.</span>Math<span class="kw">.</span>Max<span class="op">(</span><span class="dv">3</span>, <span class="dv">5</span><span class="op">)</span>          //<span class="co"> 5</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> middle = <span class="st">"hello"</span>.Substring<span class="op">(</span><span class="dv">1</span>, <span class="dv">3</span><span class="op">)</span>        //<span class="co"> "ell"</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> named = <span class="st">"hello"</span>.Substring<span class="op">(</span>startIndex = <span class="dv">1</span>, length = <span class="dv">3</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>That looks exactly like a function applied to a tuple, and F# does treat a method’s argument list much like a tuple. If you turn a method into an F# function value, it becomes a function that takes a <strong>tuple</strong>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> maxInt : <span class="dt">int</span> * <span class="dt">int</span> -&gt; <span class="dt">int</span> = System<span class="kw">.</span>Math<span class="kw">.</span>Max</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> nine = maxInt <span class="op">(</span><span class="dv">2</span>, <span class="dv">9</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode fsi code-with-copy"><code class="sourceCode fsharp"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> maxInt: val1: <span class="dt">int</span> * val2: <span class="dt">int</span> -&gt; <span class="dt">int</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>But a method call is not an ordinary F# function call. Three differences matter in practice:</p>
+<ul>
+<li><p><strong>No partial application.</strong> A method needs all its arguments at once:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode fsi code-with-copy"><code class="sourceCode fsharp"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>&gt; System<span class="kw">.</span>Math<span class="kw">.</span>Max <span class="dv">3</span>;;</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>error FS0503: A <span class="kw">member</span> <span class="kw">or</span> <span class="kw">object</span> constructor 'Max' taking <span class="dv">1</span> arguments is <span class="kw">not</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>accessible from this code location. All accessible versions <span class="kw">of</span> method 'Max'</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>take <span class="dv">2</span> arguments.</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div></li>
+<li><p><strong>Named arguments.</strong> You can name a method’s arguments, as in <code>Substring(startIndex = 1, length = 3)</code> above. F# functions don’t allow that.</p></li>
+<li><p><strong>Overloading.</strong> One method name can have several versions for different argument types (<code>Math.Max</code> exists for <code>int</code>, <code>float</code>, and more). F# picks one from the argument types. F# functions have exactly one type each.</p></li>
+</ul>
+<p>So F# code uses two calling styles side by side, and each has its place:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>F# functions</th>
+<th>.NET methods</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Call</td>
+<td><code>rectangleArea 4 3</code></td>
+<td><code>System.Math.Max(4, 3)</code>, <code>s.Substring(1, 3)</code></td>
+</tr>
+<tr class="even">
+<td>Arguments</td>
+<td>one at a time (<strong>curried</strong>)</td>
+<td>all together, in parentheses (<strong>tupled</strong>)</td>
+</tr>
+<tr class="odd">
+<td>Partial application</td>
+<td>yes</td>
+<td>no</td>
+</tr>
+</tbody>
+</table>
+<p>Week 1’s warning, <em>don’t write <code>f(a, b)</code></em>, is about <strong>F# functions</strong>. For <strong>methods</strong>, <code>M(a, b)</code> is exactly right. By convention, F# programmers write no space between a method and its parentheses (<code>s.Substring(1, 3)</code>), and a space before an F# function’s arguments (<code>power 2.0 10</code>), which makes the two styles easy to tell apart.</p>
+</section>
+<section id="comparing-tuples" class="level2" data-number="2.6">
+<h2 data-number="2.6" class="anchored" data-anchor-id="comparing-tuples"><span class="header-section-number">2.6</span> Comparing tuples</h2>
+<p>Tuples are compared <strong>component by component</strong>, from left to right:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode fsi code-with-copy"><code class="sourceCode fsharp"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>&gt; <span class="op">(</span><span class="dv">1</span>, <span class="st">"a"</span><span class="op">)</span> = <span class="op">(</span><span class="dv">1</span>, <span class="st">"a"</span><span class="op">)</span>;;</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> it: <span class="dt">bool</span> = <span class="kw">true</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>&gt; <span class="op">(</span><span class="dv">1</span>, <span class="st">"b"</span><span class="op">)</span> &lt; <span class="op">(</span><span class="dv">2</span>, <span class="st">"a"</span><span class="op">)</span>;;</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> it: <span class="dt">bool</span> = <span class="kw">true</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>(1, "b") &lt; (2, "a")</code> because the first components already decide it: <code>1 &lt; 2</code>.</p>
+</section>
+</section>
+<section id="lists" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Lists</h1>
+<section id="building-lists" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="building-lists"><span class="header-section-number">3.1</span> Building lists</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> empty : <span class="dt">int</span> list = <span class="op">[]</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> digits = <span class="op">[</span><span class="dv">0</span> .. <span class="dv">9</span><span class="op">]</span>              //<span class="co"> a range</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> evensDown = <span class="op">[</span><span class="dv">10</span> .. <span class="dv">-2</span> .. <span class="dv">0</span><span class="op">]</span>    //<span class="co"> [10; 8; 6; 4; 2; 0]</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> nothing = <span class="op">[</span><span class="dv">5</span> .. <span class="dv">1</span><span class="op">]</span>             //<span class="co"> []: an empty range</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>A <strong>range</strong> <code>[a .. b]</code> counts from <code>a</code> up to <code>b</code>; <code>[a .. step .. b]</code> counts in steps, which can be negative. If the range is empty, so is the list. (Ranges work well for <code>int</code>s. Avoid them for <code>float</code>s, where rounding makes the last element unpredictable.)</p>
+<p>All elements of a list must have the same type:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode fsi code-with-copy"><code class="sourceCode fsharp"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>&gt; <span class="op">[</span><span class="dv">1</span>; <span class="st">"two"</span><span class="op">]</span>;;</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>error FS0001: All elements <span class="kw">of</span> a list must be implicitly convertible <span class="kw">to</span> the <span class="kw">type</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="kw">of</span> the first element, which here is 'int'. This element has <span class="kw">type</span> 'string'.</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="what-a-list-really-is" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="what-a-list-really-is"><span class="header-section-number">3.2</span> What a list really is</h2>
+<p>Every list is one of exactly two things:</p>
+<ul>
+<li>the <strong>empty list</strong> <code>[]</code>, or</li>
+<li>an element <strong>in front of</strong> another list, written <code>x :: rest</code>, pronounced “x cons rest”. The element <code>x</code> is called the <strong>head</strong>, and <code>rest</code> the <strong>tail</strong>.</li>
+</ul>
+<p>The notation <code>[1; 2; 3]</code> is just a convenient way of writing <code>1 :: (2 :: (3 :: []))</code>. The <code>::</code> operator groups to the right, so the parentheses can be dropped:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> xs = <span class="op">[</span><span class="dv">2</span>; <span class="dv">3</span><span class="op">]</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> ys = <span class="dv">1</span> :: xs            //<span class="co"> [1; 2; 3]; xs unchanged</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> same = <span class="dv">1</span> :: <span class="dv">2</span> :: <span class="dv">3</span> :: <span class="op">[]</span>   //<span class="co"> what [1; 2; 3] means</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Adding an element in front with <code>::</code> does <strong>not</strong> copy the list. The new list simply points to the old one, which is shared:</p>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div id="fig-sharing" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-sharing-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div>
+<svg width="672" height="480" viewbox="0.00 0.00 422.00 112.30" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" style="; max-width: none; max-height: none">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 108.3)">
+<!-- ys -->
+<g id="node1" class="node">
+<title>ys</title>
+<text text-anchor="middle" x="27" y="-74.8" font-family="Consolas, monospace" font-size="14.00" fill="#156082">ys</text>
+</g>
+<!-- c1 -->
+<g id="node3" class="node">
+<title>c1</title>
+<polygon fill="none" stroke="#156082" points="90,-54.2 90,-103.8 144,-103.8 144,-54.2 90,-54.2"></polygon>
+<text text-anchor="middle" x="117" y="-87.2" font-family="Consolas, monospace" font-size="14.00" fill="#1f2933">1</text>
+<polyline fill="none" stroke="#156082" points="90,-79 144,-79 "></polyline>
+<text text-anchor="middle" x="117" y="-62.4" font-family="Consolas, monospace" font-size="14.00" fill="#1f2933"> </text>
+</g>
+<!-- ys&#45;&gt;c1 -->
+<g id="edge1" class="edge">
+<title>ys-&gt;c1</title>
+<path fill="none" stroke="#156082" d="M54.4,-79C62.39,-79 71.31,-79 79.82,-79"></path>
+<polygon fill="#156082" stroke="#156082" points="79.92,-82.5 89.92,-79 79.92,-75.5 79.92,-82.5"></polygon>
+</g>
+<!-- xs -->
+<g id="node2" class="node">
+<title>xs</title>
+<text text-anchor="middle" x="117" y="-13.8" font-family="Consolas, monospace" font-size="14.00" fill="#156082">xs</text>
+</g>
+<!-- c2 -->
+<g id="node4" class="node">
+<title>c2</title>
+<polygon fill="none" stroke="#156082" points="180,-17.2 180,-66.8 234,-66.8 234,-17.2 180,-17.2"></polygon>
+<text text-anchor="middle" x="207" y="-50.2" font-family="Consolas, monospace" font-size="14.00" fill="#1f2933">2</text>
+<polyline fill="none" stroke="#156082" points="180,-42 234,-42 "></polyline>
+<text text-anchor="middle" x="207" y="-25.4" font-family="Consolas, monospace" font-size="14.00" fill="#1f2933"> </text>
+</g>
+<!-- xs&#45;&gt;c2 -->
+<g id="edge3" class="edge">
+<title>xs-&gt;c2</title>
+<path fill="none" stroke="#156082" d="M144.4,-25.2C152.48,-27.4 161.51,-29.87 170.1,-32.21"></path>
+<polygon fill="#156082" stroke="#156082" points="169.35,-35.63 179.92,-34.89 171.19,-28.88 169.35,-35.63"></polygon>
+</g>
+<!-- c1&#45;&gt;c2 -->
+<g id="edge2" class="edge">
+<title>c1:t-&gt;c2</title>
+<path fill="none" stroke="#156082" d="M144,-67C152.84,-67 161.91,-64.79 170.29,-61.68"></path>
+<polygon fill="#156082" stroke="#156082" points="171.9,-64.8 179.76,-57.69 169.18,-58.34 171.9,-64.8"></polygon>
+</g>
+<!-- c3 -->
+<g id="node5" class="node">
+<title>c3</title>
+<polygon fill="none" stroke="#156082" points="270,-5.2 270,-54.8 324,-54.8 324,-5.2 270,-5.2"></polygon>
+<text text-anchor="middle" x="297" y="-38.2" font-family="Consolas, monospace" font-size="14.00" fill="#1f2933">3</text>
+<polyline fill="none" stroke="#156082" points="270,-30 324,-30 "></polyline>
+<text text-anchor="middle" x="297" y="-13.4" font-family="Consolas, monospace" font-size="14.00" fill="#1f2933"> </text>
+</g>
+<!-- c2&#45;&gt;c3 -->
+<g id="edge4" class="edge">
+<title>c2:t-&gt;c3</title>
+<path fill="none" stroke="#156082" d="M234,-30C242.25,-30 251.12,-30 259.49,-30"></path>
+<polygon fill="#156082" stroke="#156082" points="259.75,-33.5 269.75,-30 259.75,-26.5 259.75,-33.5"></polygon>
+</g>
+<!-- nil -->
+<g id="node6" class="node">
+<title>nil</title>
+<text text-anchor="middle" x="387" y="-13.8" font-family="Consolas, monospace" font-size="14.00" fill="#1f2933">[]</text>
+</g>
+<!-- c3&#45;&gt;nil -->
+<g id="edge5" class="edge">
+<title>c3:t-&gt;nil</title>
+<path fill="none" stroke="#156082" d="M324,-18C332.25,-18 341.12,-18 349.49,-18"></path>
+<polygon fill="#156082" stroke="#156082" points="349.75,-21.5 359.75,-18 349.75,-14.5 349.75,-21.5"></polygon>
+</g>
+</g>
+</svg>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-sharing-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: <code>ys = 1 :: xs</code> shares all of <code>xs</code>. Nothing is copied.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>This is safe <em>because</em> lists are immutable. Nobody can change <code>xs</code> behind <code>ys</code>’s back, so sharing is invisible (Week 1’s point about aliasing). It also makes <code>::</code> very cheap: it creates one cell, however long the list is.</p>
+</section>
+</section>
+<section id="taking-lists-apart-with-match" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Taking lists apart with <code>match</code></h1>
+<p>The two forms of a list, <code>[]</code> and <code>x :: rest</code>, are also <strong>patterns</strong>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> sum xs =</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> xs <span class="kw">with</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    | <span class="op">[]</span> -&gt; <span class="dv">0</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    | x :: rest -&gt; x + sum rest</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li><code>| [] -&gt; 0</code> matches only the empty list.</li>
+<li><code>| x :: rest -&gt; …</code> matches any non-empty list, and binds <code>x</code> to its head and <code>rest</code> to its tail. For <code>[4; 5; 6]</code>, that is <code>x ↦ 4</code> and <code>rest ↦ [5; 6]</code>.</li>
+</ul>
+<p>More list patterns:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Pattern</th>
+<th>Matches</th>
+<th>Example binding for <code>[4; 5; 6]</code></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>[]</code></td>
+<td>the empty list</td>
+<td>(doesn’t match)</td>
+</tr>
+<tr class="even">
+<td><code>x :: rest</code></td>
+<td>any non-empty list</td>
+<td><code>x ↦ 4</code>, <code>rest ↦ [5; 6]</code></td>
+</tr>
+<tr class="odd">
+<td><code>_ :: rest</code></td>
+<td>any non-empty list; ignore the head</td>
+<td><code>rest ↦ [5; 6]</code></td>
+</tr>
+<tr class="even">
+<td><code>[x]</code></td>
+<td>a list with exactly one element</td>
+<td>(doesn’t match)</td>
+</tr>
+<tr class="odd">
+<td><code>[x; y]</code></td>
+<td>exactly two elements</td>
+<td>(doesn’t match)</td>
+</tr>
+<tr class="even">
+<td><code>x :: y :: rest</code></td>
+<td>at least two elements</td>
+<td><code>x ↦ 4</code>, <code>y ↦ 5</code>, <code>rest ↦ [6]</code></td>
+</tr>
+</tbody>
+</table>
+<p>As in Week 2, F# warns when a <code>match</code> misses a case, and for lists it’s usually the empty list:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode fsi code-with-copy"><code class="sourceCode fsharp"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>&gt; <span class="kw">let</span> <span class="kw">rec</span> sumBad xs =</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>      <span class="kw">match</span> xs <span class="kw">with</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>      | x :: rest -&gt; x + sumBad rest;;</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>warning FS0025: Incomplete pattern matches on this expression. For example, the</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>value '<span class="op">[]</span>' may indicate a case <span class="kw">not</span> covered by the pattern<span class="op">(</span>s<span class="op">)</span>.</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="matching-on-several-values-at-once" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="matching-on-several-values-at-once"><span class="header-section-number">4.1</span> Matching on several values at once</h2>
+<p>To look at two values together, match on a <strong>tuple</strong> of them. This is very useful for functions of two lists:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> zip xs ys =</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> xs, ys <span class="kw">with</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    | x :: xs', y :: ys' -&gt; <span class="op">(</span>x, y<span class="op">)</span> :: zip xs' ys'</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    | _ -&gt; <span class="op">[]</span>                     //<span class="co"> either one ran out</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>match xs, ys with</code> builds the pair <code>(xs, ys)</code>, and each rule’s pattern is a pair of patterns. We come back to this below.</p>
+</section>
+</section>
+<section id="the-recipe-for-lists" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> The recipe, for lists</h1>
+<p>Week 2’s recipe works unchanged. The list’s own structure tells you the two cases:</p>
+<ol type="1">
+<li><strong>Type</strong> — Usually something like <code>'a list -&gt; …</code>.</li>
+<li><strong>Base case</strong> — The <strong>empty list</strong> <code>[]</code>. What should the answer be for no elements at all?</li>
+<li><strong>Recursive case</strong> — A non-empty list <code>x :: rest</code>. <em>Trust</em> the function on <code>rest</code>, and combine that result with <code>x</code>.</li>
+<li><strong>Check</strong> — Trace a short list. The check for “getting smaller” is free: <code>rest</code> is always one element shorter than <code>x :: rest</code>.</li>
+</ol>
+<section id="length" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="length"><span class="header-section-number">5.1</span> <code>length</code></h2>
+<ol type="1">
+<li><strong>Type</strong> — <code>'a list -&gt; int</code>: the elements can be of any type.</li>
+<li><strong>Base case</strong> — the empty list has length <code>0</code>.</li>
+<li><strong>Recursive case</strong> — if <code>length rest</code> is right, the whole list is one longer.</li>
+<li><strong>Check</strong> — <code>length [7; 8] = 1 + length [8] = 1 + (1 + length []) = 2</code>.</li>
+</ol>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> length xs =</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> xs <span class="kw">with</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    | <span class="op">[]</span> -&gt; <span class="dv">0</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    | _ :: rest -&gt; <span class="dv">1</span> + length rest</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode fsi code-with-copy"><code class="sourceCode fsharp"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> length: xs: 'a list -&gt; <span class="dt">int</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>length</code> never looks at the elements (the pattern is <code>_ :: rest</code>), so it works for lists of anything. It is <strong>generic</strong>.</p>
+</section>
+<section id="a-full-trace-sum" class="level2" data-number="5.2">
+<h2 data-number="5.2" class="anchored" data-anchor-id="a-full-trace-sum"><span class="header-section-number">5.2</span> A full trace: <code>sum</code></h2>
+<pre class="trace"><code>   sum [1; 2; 3]
+⇝ 1 + sum [2; 3]                    (7) x ↦ 1, rest ↦ [2; 3]
+⇝ 1 + (2 + sum [3])                 (7) x ↦ 2, rest ↦ [3]
+⇝ 1 + (2 + (3 + sum []))            (7) x ↦ 3, rest ↦ []
+⇝ 1 + (2 + (3 + 0))                 (7) [] fits the first rule
+⇝ 6                                 (4)</code></pre>
+<p>The same shape as <code>fact</code> in Week 2: the expression grows while the additions wait, then shrinks.</p>
+</section>
+<section id="joining-lists-append" class="level2" data-number="5.3">
+<h2 data-number="5.3" class="anchored" data-anchor-id="joining-lists-append"><span class="header-section-number">5.3</span> Joining lists: <code>append</code></h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> append xs ys =</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> xs <span class="kw">with</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>    | <span class="op">[]</span> -&gt; ys</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>    | x :: rest -&gt; x :: append rest ys</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre class="trace"><code>append [1; 2] [3; 4]
+  = 1 :: append [2] [3; 4]
+  = 1 :: (2 :: append [] [3; 4])
+  = 1 :: (2 :: [3; 4])
+  = [1; 2; 3; 4]</code></pre>
+<p>Only the first list is taken apart; the second is used as it is, and shared. F# has this function built in as the operator <code>@</code>: <code>[1; 2] @ [3; 4]</code>.</p>
+</section>
+<section id="membership-and-the-equality-constraint" class="level2" data-number="5.4">
+<h2 data-number="5.4" class="anchored" data-anchor-id="membership-and-the-equality-constraint"><span class="header-section-number">5.4</span> Membership, and the <code>equality</code> constraint</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> isMember x xs =</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> xs <span class="kw">with</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>    | <span class="op">[]</span> -&gt; <span class="kw">false</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>    | y :: rest -&gt; x = y || isMember x rest</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode fsi code-with-copy"><code class="sourceCode fsharp"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> isMember: x: 'a -&gt; xs: 'a list -&gt; <span class="dt">bool</span> <span class="kw">when</span> 'a: equality</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>isMember</code> is generic, with a condition: <code>when 'a: equality</code> means “any type whose values can be compared with <code>=</code>”. Almost all types qualify: numbers, strings, tuples, lists of those. The main exception is <strong>functions</strong>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="sourceCode fsi code-with-copy"><code class="sourceCode fsharp"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>&gt; <span class="kw">let</span> f x = x + <span class="dv">1</span>;;</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>&gt; f = f;;</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>error FS0001: The <span class="kw">type</span> 'int -&gt; int' does <span class="kw">not</span> support the 'equality' constraint</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>because it is a <span class="kw">function</span> <span class="kw">type</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>(Deciding whether two functions always give the same results is impossible in general, so F# doesn’t pretend to.) A related condition, <code>when 'a: comparison</code>, means values can also be ordered with <code>&lt;</code>; we meet it in <code>maximum</code> and <code>merge</code> below.</p>
+</section>
+<section id="same-recipe-different-steps" class="level2" data-number="5.5">
+<h2 data-number="5.5" class="anchored" data-anchor-id="same-recipe-different-steps"><span class="header-section-number">5.5</span> Same recipe, different steps</h2>
+<p>Put the four functions side by side:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Function</th>
+<th>Base case</th>
+<th>Recursive step</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>length</code></td>
+<td><code>0</code></td>
+<td><code>1 + length rest</code></td>
+</tr>
+<tr class="even">
+<td><code>sum</code></td>
+<td><code>0</code></td>
+<td><code>x + sum rest</code></td>
+</tr>
+<tr class="odd">
+<td><code>append</code></td>
+<td><code>ys</code></td>
+<td><code>x :: append rest ys</code></td>
+</tr>
+<tr class="even">
+<td><code>isMember</code></td>
+<td><code>false</code></td>
+<td><code>x = y</code> || <code>isMember x rest</code></td>
+</tr>
+</tbody>
+</table>
+<p>The recipe, and most of the code, is the same every time. All the thinking goes into two places: <strong>what the answer is for the empty list</strong>, and <strong>how to build the answer from <code>x</code> and the trusted result for <code>rest</code></strong>. When you meet a new problem, those are the two questions to answer before writing any code.</p>
+</section>
+</section>
+<section id="recursion-shapes" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> Recursion shapes</h1>
+<p>Look at enough list functions and you will notice that most of them have one of a few <strong>shapes</strong>. Recognising the shape of a problem tells you most of the code before you write it.</p>
+<section id="transform-each-element" class="level2" data-number="6.1">
+<h2 data-number="6.1" class="anchored" data-anchor-id="transform-each-element"><span class="header-section-number">6.1</span> Transform each element</h2>
+<p><em>The result has one element for each input element.</em></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> doubleAll xs =</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> xs <span class="kw">with</span></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>    | <span class="op">[]</span> -&gt; <span class="op">[]</span></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>    | x :: rest -&gt; <span class="dv">2</span> * x :: doubleAll rest</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> lengths <span class="op">(</span>words: <span class="dt">string</span> list<span class="op">)</span> =</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> words <span class="kw">with</span></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>    | <span class="op">[]</span> -&gt; <span class="op">[]</span></span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>    | w :: rest -&gt; w.Length :: lengths rest</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The base case is always <code>[]</code>, and the recursive case always has the form <code>(something with x) :: f rest</code>. Only the “something with <code>x</code>” changes: <code>2 * x</code> in one, <code>w.Length</code> in the other. (In <code>2 * x :: doubleAll rest</code>, the <code>*</code> is done before the <code>::</code>. <code>lengths</code> needs a type annotation because of <code>.Length</code>, as in Week 2.)</p>
+</section>
+<section id="keep-some-elements" class="level2" data-number="6.2">
+<h2 data-number="6.2" class="anchored" data-anchor-id="keep-some-elements"><span class="header-section-number">6.2</span> Keep some elements</h2>
+<p><em>The result has some of the input elements, in the same order.</em></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> evens xs =</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> xs <span class="kw">with</span></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>    | <span class="op">[]</span> -&gt; <span class="op">[]</span></span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>    | x :: rest <span class="kw">when</span> x % <span class="dv">2</span> = <span class="dv">0</span> -&gt; x :: evens rest</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>    | _ :: rest -&gt; evens rest</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb33"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> removeAll y xs =</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> xs <span class="kw">with</span></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>    | <span class="op">[]</span> -&gt; <span class="op">[]</span></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>    | x :: rest <span class="kw">when</span> x = y -&gt; removeAll y rest</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>    | x :: rest -&gt; x :: removeAll y rest</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Two recursive cases: one that keeps <code>x</code> (<code>x :: f rest</code>) and one that drops it (<code>f rest</code>). A guard decides which. The condition is the only difference between <code>evens</code> and <code>removeAll</code>.</p>
+</section>
+<section id="combine-all-elements-into-one-value" class="level2" data-number="6.3">
+<h2 data-number="6.3" class="anchored" data-anchor-id="combine-all-elements-into-one-value"><span class="header-section-number">6.3</span> Combine all elements into one value</h2>
+<p><em>The result is a single value built from all the elements.</em></p>
+<p><code>sum</code> and <code>length</code> above are of this shape, and so is:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> product xs =</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> xs <span class="kw">with</span></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>    | <span class="op">[]</span> -&gt; <span class="dv">1</span></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>    | x :: rest -&gt; x * product rest</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The base case is the answer for “no elements”: <code>0</code> for a sum, <code>1</code> for a product. Some combinations have no sensible answer for the empty list. The maximum of no numbers doesn’t exist, so the base case is a one-element list, and the empty list is an error:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb35"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> maximum xs =</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> xs <span class="kw">with</span></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>    | <span class="op">[]</span> -&gt; failwith <span class="st">"maximum: empty list"</span></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>    | <span class="op">[</span>x<span class="op">]</span> -&gt; x</span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>    | x :: rest -&gt; max x <span class="op">(</span>maximum rest<span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb36"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> join words =</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> words <span class="kw">with</span></span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>    | <span class="op">[]</span> -&gt; <span class="st">""</span></span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>    | <span class="op">[</span>w<span class="op">]</span> -&gt; w</span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>    | w :: rest -&gt; w + <span class="st">" "</span> + join rest</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>join</code> also uses <code>[w]</code> as a base case, for a different reason: so that there is no extra space at the end.</p>
+</section>
+<section id="stop-early" class="level2" data-number="6.4">
+<h2 data-number="6.4" class="anchored" data-anchor-id="stop-early"><span class="header-section-number">6.4</span> Stop early</h2>
+<p><em>Look through the elements, but stop as soon as the answer is known.</em></p>
+<p><code>isMember</code> is of this shape, and so is:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb37"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> allPositive xs =</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> xs <span class="kw">with</span></span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>    | <span class="op">[]</span> -&gt; <span class="kw">true</span></span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>    | x :: rest -&gt; x &gt; <span class="dv">0</span> &amp;&amp; allPositive rest</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The recursive call sits on the right of <code>&amp;&amp;</code> (or <code>||</code>). Recall from Week 1 that <code>&amp;&amp;</code> doesn’t evaluate its right side when the left side is <code>false</code>. So <code>allPositive [1; -2; 3; 4; 5]</code> stops at <code>-2</code>, and never looks at the rest.</p>
+</section>
+<section id="each-element-to-many" class="level2" data-number="6.5">
+<h2 data-number="6.5" class="anchored" data-anchor-id="each-element-to-many"><span class="header-section-number">6.5</span> Each element to many</h2>
+<p><em>Each input element contributes zero, one, or several elements to the result.</em></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb38"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> stutter xs =</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> xs <span class="kw">with</span></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>    | <span class="op">[]</span> -&gt; <span class="op">[]</span></span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>    | x :: rest -&gt; x :: x :: stutter rest</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb39"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> concat xss =</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> xss <span class="kw">with</span></span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>    | <span class="op">[]</span> -&gt; <span class="op">[]</span></span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>    | xs :: rest -&gt; append xs <span class="op">(</span>concat rest<span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>concat</code> turns a list of lists into one list: <code>concat [[1]; []; [2; 3]] = [1; 2; 3]</code>. Its type is <code>'a list list -&gt; 'a list</code>.</p>
+</section>
+<section id="why-the-shapes-matter" class="level2" data-number="6.6">
+<h2 data-number="6.6" class="anchored" data-anchor-id="why-the-shapes-matter"><span class="header-section-number">6.6</span> Why the shapes matter</h2>
+<p>In each shape, almost all of the code is the same every time. Only one small piece changes: the transformation (<code>2 * x</code>), the condition (<code>x % 2 = 0</code>), or the way of combining (<code>+</code>, <code>*</code>, <code>max</code>). In Week 5, we will turn each shape into <strong>one</strong> function, and pass the changing piece in as a parameter. You will then recognise every one of those library functions, because you will have written them all by hand this week.</p>
+</section>
+</section>
+<section id="lists-and-tuples-together" class="level1" data-number="7">
+<h1 data-number="7"><span class="header-section-number">7</span> Lists and tuples together</h1>
+<section id="pairing-up-zip-and-unzip" class="level2" data-number="7.1">
+<h2 data-number="7.1" class="anchored" data-anchor-id="pairing-up-zip-and-unzip"><span class="header-section-number">7.1</span> Pairing up: <code>zip</code> and <code>unzip</code></h2>
+<p><code>zip</code> (above) pairs up two lists element by element: <code>zip [1; 2; 3] ["a"; "b"]</code> is <code>[(1, "a"); (2, "b")]</code>. It stops when either list runs out. Its type says it all:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb40"><pre class="sourceCode fsi code-with-copy"><code class="sourceCode fsharp"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> zip: xs: 'a list -&gt; ys: 'b list -&gt; <span class="op">(</span>'a * 'b<span class="op">)</span> list</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>unzip</code> goes the other way. It needs something new: using the <strong>result</strong> of the recursive call, which is a pair, before building the answer:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb41"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> unzip pairs =</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> pairs <span class="kw">with</span></span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>    | <span class="op">[]</span> -&gt; <span class="op">([]</span>, <span class="op">[])</span></span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>    | <span class="op">(</span>x, y<span class="op">)</span> :: rest -&gt;</span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> <span class="op">(</span>xs, ys<span class="op">)</span> = unzip rest     //<span class="co"> trust it; take it apart</span></span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>        <span class="op">(</span>x :: xs, y :: ys<span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre class="trace"><code>unzip [(1, "a"); (2, "b")]
+  = let (xs, ys) = unzip [(2, "b")] in (1 :: xs, "a" :: ys)
+  = let (xs, ys) = ([2], ["b"])      in (1 :: xs, "a" :: ys)
+  = ([1; 2], ["a"; "b"])</code></pre>
+<p>The recipe still applies. We trust <code>unzip rest</code> to give the right pair of lists, take that pair apart with a pattern, and add <code>x</code> and <code>y</code> to the front of each.</p>
+</section>
+<section id="returning-two-results-from-one-pass" class="level2" data-number="7.2">
+<h2 data-number="7.2" class="anchored" data-anchor-id="returning-two-results-from-one-pass"><span class="header-section-number">7.2</span> Returning two results from one pass</h2>
+<p>The same technique lets a function compute two things in a single pass over a list:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb43"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> sumProd xs =</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> xs <span class="kw">with</span></span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>    | <span class="op">[]</span> -&gt; <span class="op">(</span><span class="dv">0</span>, <span class="dv">1</span><span class="op">)</span></span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>    | x :: rest -&gt;</span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> <span class="op">(</span>s, p<span class="op">)</span> = sumProd rest</span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>        <span class="op">(</span>x + s, x * p<span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>sumProd [2; 5]</code> is <code>(7, 10)</code>.</p>
+<p>Here is a function that uses two base cases <em>and</em> a pair result. <code>split</code> deals out a list like cards, alternately into two piles:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb44"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> split xs =</span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> xs <span class="kw">with</span></span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>    | <span class="op">[]</span> -&gt; <span class="op">([]</span>, <span class="op">[])</span></span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>    | <span class="op">[</span>x<span class="op">]</span> -&gt; <span class="op">([</span>x<span class="op">]</span>, <span class="op">[])</span></span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>    | x :: y :: rest -&gt;</span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> <span class="op">(</span>odds, evens<span class="op">)</span> = split rest</span>
+<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a>        <span class="op">(</span>x :: odds, y :: evens<span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>split [1; 2; 3; 4; 5]</code> is <code>([1; 3; 5], [2; 4])</code>. The pattern <code>x :: y :: rest</code> takes two elements at a time, so we need base cases for both zero and one remaining element.</p>
+</section>
+<section id="looking-things-up" class="level2" data-number="7.3">
+<h2 data-number="7.3" class="anchored" data-anchor-id="looking-things-up"><span class="header-section-number">7.3</span> Looking things up</h2>
+<p>A list of pairs works as a simple lookup table:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb45"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> lookup key table =</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> table <span class="kw">with</span></span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>    | <span class="op">[]</span> -&gt; failwith <span class="op">(</span><span class="st">"lookup: no entry for "</span> + key<span class="op">)</span></span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>    | <span class="op">(</span>k, v<span class="op">)</span> :: _ <span class="kw">when</span> k = key -&gt; v</span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>    | _ :: rest -&gt; lookup key rest</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>lookup "tea" prices</code> is <code>45</code>. The pattern <code>(k, v) :: _</code> takes apart the first pair right inside the list pattern, and the guard checks the key. For a missing key we stop with <code>failwith</code>. Next week shows a better way to say “not found”.</p>
+</section>
+</section>
+<section id="what-things-cost" class="level1" data-number="8">
+<h1 data-number="8"><span class="header-section-number">8</span> What things cost</h1>
+<p>Some list operations are cheap and some are not, and the difference follows directly from what a list is:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Operation</th>
+<th>Cost</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>x :: xs</code></td>
+<td>constant</td>
+<td>one new cell; <code>xs</code> is shared</td>
+</tr>
+<tr class="even">
+<td>look at the head</td>
+<td>constant</td>
+<td>it’s the first cell</td>
+</tr>
+<tr class="odd">
+<td><code>length xs</code></td>
+<td>proportional to the length</td>
+<td>must walk the whole list</td>
+</tr>
+<tr class="even">
+<td><code>xs @ ys</code></td>
+<td>proportional to the length of <code>xs</code></td>
+<td>copies <code>xs</code>; shares <code>ys</code></td>
+</tr>
+</tbody>
+</table>
+<p>This matters for a reverse function written the obvious way:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb46"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> naiveRev xs =</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> xs <span class="kw">with</span></span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>    | <span class="op">[]</span> -&gt; <span class="op">[]</span></span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>    | x :: rest -&gt; append <span class="op">(</span>naiveRev rest<span class="op">)</span> <span class="op">[</span>x<span class="op">]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>It is correct. But every call does an <code>append</code>, which walks the whole reversed rest. For a list of length <span class="math inline">n</span>, that adds up to about <span class="math inline">n^2 / 2</span> steps. Timing it in FSI shows the effect clearly:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb47"><pre class="sourceCode fsi code-with-copy"><code class="sourceCode fsharp"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>&gt; naiveRev <span class="op">[</span><span class="dv">1</span> .. <span class="dv">10000</span><span class="op">]</span> |&gt; List<span class="kw">.</span>length;;</span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>Real: <span class="dv">00</span>:<span class="dv">00</span>:<span class="fl">00.771</span>, CPU: <span class="dv">00</span>:<span class="dv">00</span>:<span class="fl">00.766</span>, ...</span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>&gt; naiveRev <span class="op">[</span><span class="dv">1</span> .. <span class="dv">20000</span><span class="op">]</span> |&gt; List<span class="kw">.</span>length;;</span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a>Real: <span class="dv">00</span>:<span class="dv">00</span>:<span class="fl">03.029</span>, CPU: <span class="dv">00</span>:<span class="dv">00</span>:<span class="fl">02.998</span>, ...</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Doubling the list <strong>quadruples</strong> the time. The built-in <code>List.rev</code> reverses a list of a <em>million</em> elements in about 0.05 seconds. How to write a reverse that fast yourself is one of the topics of Week 7.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Lists are not arrays
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Getting the element at position <code>i</code> of a list, <code>xs[i]</code>, has to walk <code>i</code> cells. Lists are excellent when you process elements from front to back, which is what recursion does. If you need to jump around by position, use an array. (Python’s and JavaScript’s “lists” are actually arrays; see <em>Beyond F#</em>.)</p>
+</div>
+</div>
+</section>
+<section id="two-lists-at-once-merge" class="level1" data-number="9">
+<h1 data-number="9"><span class="header-section-number">9</span> Two lists at once: <code>merge</code></h1>
+<p><em>Problem:</em> two lists are each sorted in increasing order. Merge them into one sorted list.</p>
+<p>This needs two lists at every step, so we match on the pair <code>xs, ys</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb48"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> merge xs ys =</span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> xs, ys <span class="kw">with</span></span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>    | <span class="op">[]</span>, ys -&gt; ys</span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>    | xs, <span class="op">[]</span> -&gt; xs</span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>    | x :: xs', y :: ys' -&gt;</span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a>        <span class="kw">if</span> x &lt;= y <span class="kw">then</span> x :: merge xs' ys</span>
+<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a>        <span class="kw">else</span> y :: merge xs ys'</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li>If either list is empty, the answer is the other one.</li>
+<li>Otherwise, compare the two heads. The smaller one goes first, and we merge what’s left.</li>
+</ul>
+<p><code>merge [1; 4; 9] [2; 3; 10]</code> is <code>[1; 2; 3; 4; 9; 10]</code>. Each call removes one element from one of the lists, so the recursion stops. (Its type ends in <code>when 'a: comparison</code>, because of the <code>&lt;=</code>.) This week’s lab and drills use <code>merge</code>, together with <code>split</code>, to build a complete sorting algorithm.</p>
+</section>
+<section id="text-as-a-list-of-characters" class="level1" data-number="10">
+<h1 data-number="10"><span class="header-section-number">10</span> Text as a list of characters</h1>
+<p>A string can be turned into a list of characters, and back:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb49"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> letters = List<span class="kw">.</span>ofSeq <span class="st">"level"</span>   //<span class="co"> a char list</span></span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> word = System<span class="kw">.</span>String<span class="kw">.</span>Concat <span class="op">[</span><span class="ch">'o'</span>; <span class="ch">'k'</span><span class="op">]</span>   //<span class="co"> "ok"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Then all the list techniques apply to text:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb50"><pre class="sourceCode fsharp code-with-copy"><code class="sourceCode fsharp"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> countChar c <span class="op">(</span>cs: <span class="dt">char</span> list<span class="op">)</span> =</span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">match</span> cs <span class="kw">with</span></span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>    | <span class="op">[]</span> -&gt; <span class="dv">0</span></span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a>    | x :: rest <span class="kw">when</span> x = c -&gt; <span class="dv">1</span> + countChar c rest</span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a>    | _ :: rest -&gt; countChar c rest</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>countChar 'l' (List.ofSeq "level")</code> is <code>2</code>.</p>
+</section>
+<section id="beyond-f" class="level1" data-number="11">
+<h1 data-number="11"><span class="header-section-number">11</span> Beyond F#</h1>
+<p><strong>Destructuring lists</strong> by pattern has spread to many languages:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Language</th>
+<th>“head and tail”</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Python</strong> (3.10+)</td>
+<td><code>match xs:</code> with <code>case [first, *rest]:</code> (and <code>first, *rest = xs</code> outside <code>match</code>)</td>
+</tr>
+<tr class="even">
+<td><strong>JavaScript</strong></td>
+<td><code>const [head, ...tail] = xs;</code></td>
+</tr>
+<tr class="odd">
+<td><strong>Rust</strong></td>
+<td>slice patterns: <code>match xs { [first, rest @ ..] =&gt; …, [] =&gt; … }</code></td>
+</tr>
+<tr class="even">
+<td><strong>C#</strong> (11+)</td>
+<td>list patterns on arrays: <code>arr is [var first, .. var rest]</code></td>
+</tr>
+<tr class="odd">
+<td><strong>Haskell, OCaml, Scala</strong></td>
+<td><code>x :: xs</code> or <code>x : xs</code>, as in F#</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Lists vs arrays.</strong> Python’s <code>list</code>, JavaScript’s arrays, Java’s <code>ArrayList</code>, and C#’s <code>List&lt;T&gt;</code> are all <em>arrays</em> that can grow: fast to index by position, but adding at the front copies everything. F#’s <code>list</code> is a <em>linked</em> list, like those in Haskell, OCaml, Scala, and Clojure: cheap to add at the front and to share, slow to index. Languages with immutable lists rely on sharing; languages with mutable arrays often copy defensively instead.</p>
+<p><strong>Tuples elsewhere.</strong> Python tuples and F# tuples are close cousins. C# has tuples <code>(1, "a")</code> with the same comma syntax; Rust has tuples <code>(1, "a")</code> with types like <code>(i32, &amp;str)</code>; TypeScript has <em>tuple types</em> <code>[number, string]</code> over arrays; Kotlin has <code>Pair</code> and <code>Triple</code>; Java has no tuples and uses small records instead.</p>
+<p><strong>The shapes, by other names.</strong> Every mainstream language has library functions for this week’s shapes: Python’s comprehensions <code>[2 * x for x in xs if x &gt; 0]</code>, JavaScript’s <code>map</code>, <code>filter</code>, <code>reduce</code>, <code>some</code>, <code>every</code>, and <code>flatMap</code>, Java’s streams, C#’s LINQ <code>Select</code>, <code>Where</code>, <code>Aggregate</code>, <code>SelectMany</code>. The last shape, “each element to many”, is called <code>flatMap</code> in Java, Kotlin, and JavaScript, and <code>SelectMany</code> in C#. Keep that name in mind; it will turn out to be important.</p>
+</section>
+<section id="going-further-optional" class="level1" data-number="12">
+<h1 data-number="12"><span class="header-section-number">12</span> Going further (optional)</h1>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Why list recursion always stops
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-4" class="callout-4-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>In Week 2, you had to find a <em>measure</em> to be sure a recursive function stops. For a function that follows the recipe, calling itself on <code>rest</code> when given <code>x :: rest</code>, the measure is free: the length of the list, which goes down by one with every call. This kind of recursion, which follows the structure of the data, is called <strong>structural recursion</strong>. It is guaranteed to stop on every finite list. Functions like <code>merge</code>, which shrink one of two lists, are just as safe. Most recursion in practice is structural, which is one reason functional programs are easier to trust than they might first appear.</p>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Proving a property of lists by induction
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-5" class="callout-5-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Claim: <code>length (append xs ys) = length xs + length ys</code>, for all lists <code>xs</code> and <code>ys</code>.</p>
+<p>The proof follows the structure of <code>xs</code>, just as <code>append</code> does. This is <strong>structural induction</strong>.</p>
+<ul>
+<li><em>Base case,</em> <code>xs = []</code>: <code>length (append [] ys) = length ys = 0 + length ys = length [] + length ys</code>.</li>
+<li><em>Step,</em> <code>xs = x :: rest</code>, assuming the claim for <code>rest</code>: <span class="math display">
+\begin{aligned}
+\texttt{length (append (x :: rest) ys)}
+  &amp;= \texttt{length (x :: append rest ys)} \\
+  &amp;= 1 + \texttt{length (append rest ys)} \\
+  &amp;= 1 + \texttt{length rest} + \texttt{length ys} \qquad \text{(assumption)} \\
+  &amp;= \texttt{length (x :: rest)} + \texttt{length ys}
+\end{aligned}
+</span></li>
+</ul>
+<p>Every step is a substitution from Week 1, using the definitions of <code>append</code> and <code>length</code>. That’s what makes such proofs possible: functional programs can be reasoned about like algebra.</p>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Lists are defined, not built in
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-6" class="callout-6-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p><code>[]</code> and <code>::</code> aren’t special syntax that only lists can use. In F#’s library, the list type is defined as a <strong>union type</strong> with two cases, “empty” and “cons”, and <code>[]</code> and <code>::</code> are the names of those cases. Next week you will define your own types in exactly the same way, and pattern-match on them exactly as you did on lists this week.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="summary" class="level1" data-number="13">
+<h1 data-number="13"><span class="header-section-number">13</span> Summary</h1>
+<ul>
+<li><strong>Lists</strong> hold any number of values of the <strong>same</strong> type, separated by <strong><code>;</code></strong>. <strong>Tuples</strong> hold a fixed number of values of possibly <strong>different</strong> types, separated by <strong><code>,</code></strong>. <code>[1, 2]</code> is a list of <strong>one</strong> pair.</li>
+<li>A tuple’s type is written with <code>*</code> (<code>string * int</code>). Take tuples apart with <strong>patterns</strong>; <code>fst</code> and <code>snd</code> work only on pairs.</li>
+<li>Every list is either <code>[]</code> or <code>x :: rest</code>. <code>::</code> is cheap and shares the tail; immutability makes the sharing safe.</li>
+<li>List patterns: <code>[]</code>, <code>x :: rest</code>, <code>[x]</code>, <code>x :: y :: rest</code>, …; match on a tuple (<code>match xs, ys with</code>) to look at two values at once.</li>
+<li>The <strong>recipe</strong> for lists: base case <code>[]</code>, recursive case <code>x :: rest</code> trusting <code>f rest</code>.</li>
+<li>Five <strong>shapes</strong>: transform each, keep some, combine all, stop early, each to many.</li>
+<li><code>when 'a: equality</code> and <code>when 'a: comparison</code> restrict a generic type to values that can be compared.</li>
+<li><code>@</code> copies its first list; naive reverse is <strong>quadratic</strong>.</li>
+</ul>
+</section>
+<section id="further-reading-optional" class="level1" data-number="14">
+<h1 data-number="14"><span class="header-section-number">14</span> Further reading (optional)</h1>
+<ul>
+<li>Isaac Abraham, <em>F# in Action</em>, section 5.2 (tuples).</li>
+<li>Scott Wlaschin, <em>F# for Fun and Profit</em>, the posts on tuples and on lists in the “Understanding F# types” and “Thinking functionally” series.</li>
+<li>Microsoft’s F# language reference: <em>Lists</em> and <em>Tuples</em>.</li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../../weeks/week02/lab.html" class="pagination-link" aria-label="Lab">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Lab</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../../weeks/week03/slides.html" class="pagination-link" aria-label="Slides">
+        <span class="nav-page-text">Slides</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
